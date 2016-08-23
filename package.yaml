@@ -2,13 +2,13 @@ name:                bookkeeper
 version:             0.1.0.0
 synopsis:
 description:         Please see README.md
-homepage:            http://github.com/jkarni/bookkeeper#readme
+homepage:            http://github.com/turingjump/bookkeeper#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Julian K. Arni
 maintainer:          jkarni@gmail.com
 copyright:           (c) Julian K. Arni
-github:              jkarni/bookkeeper
+github:              turingjump/bookkeeper
 tested-with:         GHC == 8.0.1
 
 ghc-options: -Wall

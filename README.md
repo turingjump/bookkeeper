@@ -28,6 +28,20 @@ custom type errors:
 --     '["age" ':-> Int, "name" ':-> String]
 ~~~
 
+
+The order in which fields are inserted or appear in types does not matter. That
+is, in:
+
+~~~ {.haskell}
+-- type A = Book '[ "field1" :=> Int, "field2" :=> Bool]
+-- type B = Book '[ "field2" :=> Bool "field1" :=> Int ]
+~~~
+
+Types `A` and `B` are the same.
+
+You can set, modify, or get fields. See the haddocks for more information.
+
+
 ~~~ {.haskell}
 main :: IO ()
 main = return ()

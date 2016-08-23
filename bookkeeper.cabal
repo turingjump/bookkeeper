@@ -5,8 +5,8 @@
 name:           bookkeeper
 version:        0.1.0.0
 description:    Please see README.md
-homepage:       http://github.com/jkarni/bookkeeper#readme
-bug-reports:    https://github.com/jkarni/bookkeeper/issues
+homepage:       http://github.com/turingjump/bookkeeper#readme
+bug-reports:    https://github.com/turingjump/bookkeeper/issues
 author:         Julian K. Arni
 maintainer:     jkarni@gmail.com
 copyright:      (c) Julian K. Arni
@@ -18,7 +18,7 @@ cabal-version:  >= 1.10
 
 source-repository head
   type: git
-  location: https://github.com/jkarni/bookkeeper
+  location: https://github.com/turingjump/bookkeeper
 
 library
   hs-source-dirs:
