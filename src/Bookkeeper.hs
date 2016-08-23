@@ -8,6 +8,9 @@ module Bookkeeper
 -- >>> let julian :: Person = emptyBook & #age =: 28 & #name =: "Julian K. Arni"
 --
 -- The OverloadedLabels and TypeOperators extensions are also required.
+--
+-- A word of warning: The signatures for most of the functions are quite
+-- arcane, even though their behaviour is intuitive.
 
   -- * Initialization
    emptyBook

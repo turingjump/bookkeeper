@@ -18,6 +18,9 @@ jane = emptyBook
 -- "Jane"
 ~~~
 
+It bears some similarities to Nikita Volkov's [record](https://nikita-volkov.github.io/record/)
+library, but requires no Template Haskell.
+
 Accesing a field that does not exist is a type error, made nicer with GHCs new
 custom type errors:
 
