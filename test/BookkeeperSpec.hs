@@ -36,16 +36,14 @@ spec = describe "books" $ do
              & #age =: 28
              & #name %: fmap toUpper
       get #name p `shouldBe` "JULIAN K. ARNI"
-{-
 
     it "allows extension" $ do
       let p :: Person
-             = #name "Julian K. Arni"
-               #age 28
-               $ book
-      let p' = #email "jkarni<at>turingjump<dot>com" p
-      #email p' `shoulBe` "jkarni<at>turingjump<dot>com"
--}
+             = emptyBook
+             & #name =: "Julian K. Arni"
+             & #age =: 28
+      let p' = #email =: "jkarni<at>turingjump<dot>com" $ p
+      get #email p' `shouldBe` ("jkarni<at>turingjump<dot>com" :: String)
 
 type Person = Book '[ "name" :=> String , "age" :=> Int]
 

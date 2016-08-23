@@ -16,11 +16,15 @@ import Bookkeeper.Errors
 -- Using a type synonym allows the user to write the fields in any order, and
 -- yet have the underlying value always have sorted fields.
 type Book a = Book' (Map.AsMap a)
-data Book' (a :: [Mapping Symbol Type]) = Book { getBook :: Map a }
+
+-- | The internal representation of a Book.
+newtype Book' (a :: [Mapping Symbol Type]) = Book { getBook :: Map a }
 
 emptyBook :: Book '[]
 emptyBook = Book Map.Empty
 
+-- | An alias for ':->' because otherwise you'll have to tick your
+-- constructors.
 type a :=> b = a ':-> b
 
 instance Monoid (Book' '[]) where
@@ -98,7 +102,21 @@ set _ v (Book bk)
 (=:) = set
 
 
-update :: forall field val val' old mid1 mid2 new .
+-- | Apply a function to a field.
+--
+-- >>> let julian' = julian & modify #name (fmap toUpper)
+-- >>> get #name julian'
+-- "JULIAN K. ARNI"
+--
+-- If the key does not exist, throws a type error
+-- >>> modify #height (\_ -> 132) julian
+-- ...
+-- ...  • The provided Book does not contain the field "height"
+-- ...    Book type:
+-- ...    '["age" ':-> Int, "name" ':-> String]
+-- ...  • In the expression: modify #height (\ _ -> 132) julian
+-- ...
+modify :: forall field val val' old mid1 mid2 new .
   ( Map.Unionable '[field :=> ChooseFirst val'] mid1
   , Mappable ChooseFirst old mid1
   , Mappable ChooseFirst new mid2
@@ -109,9 +127,14 @@ update :: forall field val val' old mid1 mid2 new .
   , new ~ MapBack ChooseFirst mid2
   , Map.AsMap new ~ new
   ) =>  Key field -> (val -> val') -> Book' old -> Book new
-update p f b = set p v b
+modify p f b = set p v b
   where v = f $ get p b
 
+-- | Infix version of 'modify'.
+--
+-- >>> let julian' = julian & #name %: fmap toUpper
+-- >>> get #name julian'
+-- "JULIAN K. ARNI"
 (%:) :: forall field val val' old mid1 mid2 new .
   ( Map.Unionable '[field :=> ChooseFirst val'] mid1
   , Mappable ChooseFirst old mid1
@@ -123,7 +146,7 @@ update p f b = set p v b
   , new ~ MapBack ChooseFirst mid2
   , Map.AsMap new ~ new
   ) =>  Key field -> (val -> val') -> Book' old -> Book new
-(%:) = update
+(%:) = modify
 
 
 -- * Mapping
@@ -162,6 +185,7 @@ instance MapMap f '[] where
   type MapMapT f '[] = '[]
   mapMap _ m = m
 
+{-#  WARNING ChooseFirst "This should not be used" #-}
 newtype ChooseFirst a = ChooseFirst { getChooseFirst :: a }
  deriving (Eq, Show, Read, Generic)
 
@@ -173,5 +197,6 @@ type instance Map.Combine (ChooseFirst a) (ChooseFirst b) = ChooseFirst a
 
 -- $setup
 -- >>> import Data.Function ((&))
+-- >>> import Data.Char (toUpper)
 -- >>> type Person = Book '[ "name" :=> String , "age" :=> Int ]
 -- >>> let julian :: Person = emptyBook & #age =: 28 & #name =: "Julian K. Arni"
