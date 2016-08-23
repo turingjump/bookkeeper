@@ -9,6 +9,11 @@ module Bookkeeper
   -- * Setters
   , set
   , (=:)
+
+  -- * Updating
+  , update
+  , (%:)
+
   -- * Re-exports
   , (&)
 

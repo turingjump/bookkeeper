@@ -29,14 +29,14 @@ spec = describe "books" $ do
              & #age  =:  28
       get #name p  `shouldBe` "Julian K. Arni"
 
-{-
     it "allows update" $ do
       let p :: Person
-             = #name "Julian K. Arni"
-               #age 28
-               $ book
-      let p' = #name (fmap toUpper) p
-      #name p' `shouldBe` "JULIAN K. ARNI"
+             = emptyBook
+             & #name =: "Julian K. Arni"
+             & #age =: 28
+             & #name %: fmap toUpper
+      get #name p `shouldBe` "JULIAN K. ARNI"
+{-
 
     it "allows extension" $ do
       let p :: Person

@@ -98,6 +98,34 @@ set _ v (Book bk)
 (=:) = set
 
 
+update :: forall field val val' old mid1 mid2 new .
+  ( Map.Unionable '[field :=> ChooseFirst val'] mid1
+  , Mappable ChooseFirst old mid1
+  , Mappable ChooseFirst new mid2
+  , (Map.Submap '[field :=> val] old
+  , Contains old field val )
+  , mid1 ~ (MapThere ChooseFirst old)
+  , mid2 ~ (Map.Union '[field :=> ChooseFirst val'] mid1)
+  , new ~ MapBack ChooseFirst mid2
+  , Map.AsMap new ~ new
+  ) =>  Key field -> (val -> val') -> Book' old -> Book new
+update p f b = set p v b
+  where v = f $ get p b
+
+(%:) :: forall field val val' old mid1 mid2 new .
+  ( Map.Unionable '[field :=> ChooseFirst val'] mid1
+  , Mappable ChooseFirst old mid1
+  , Mappable ChooseFirst new mid2
+  , (Map.Submap '[field :=> val] old
+  , Contains old field val )
+  , mid1 ~ (MapThere ChooseFirst old)
+  , mid2 ~ (Map.Union '[field :=> ChooseFirst val'] mid1)
+  , new ~ MapBack ChooseFirst mid2
+  , Map.AsMap new ~ new
+  ) =>  Key field -> (val -> val') -> Book' old -> Book new
+(%:) = update
+
+
 -- * Mapping
 --
 -- | In order to be able to establish how maps are to combined, we need to a
