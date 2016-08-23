@@ -3,7 +3,7 @@
 -- see: https://github.com/sol/hpack
 
 name:           bookkeeper
-version:        0.1.0.0
+version:        0.1.1.0
 description:    Please see README.md
 homepage:       http://github.com/turingjump/bookkeeper#readme
 bug-reports:    https://github.com/turingjump/bookkeeper/issues

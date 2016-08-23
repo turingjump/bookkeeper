@@ -66,6 +66,7 @@ get _ (Book bk) = case (Map.submap bk :: Map '[field :=> val]) of
 (?:) :: forall field book val. (Map.Submap '[field :=> val] book, Contains book field val )
   => Book' book -> Key field -> val
 (?:) = flip get
+infixl 3 ?:
 
 -- | Sets or updates a field to a value.
 --
@@ -104,6 +105,7 @@ set _ v (Book bk)
   )
   => Key field -> val -> Book' old -> Book' new
 (=:) = set
+infix 3 =:
 
 
 -- | Apply a function to a field.
@@ -151,6 +153,24 @@ modify p f b = set p v b
   , Map.AsMap new ~ new
   ) =>  Key field -> (val -> val') -> Book' old -> Book new
 (%:) = modify
+infixr 3 %:
+
+
+-- | Delete a field from a 'Book', if it exists. If it does not, returns the
+-- @Book@ unmodified.
+--
+-- >>> get #name $ delete #name julian
+-- ...
+-- ...  • The provided Book does not contain the field "name"
+-- ...    Book type:
+-- ...    '["age" ':-> Int]
+-- ...  • In the expression: get #name
+-- ...
+delete :: forall field old .
+        ( Map.Submap (Map.AsMap (old Map.:\ field)) old
+        ) => Key field -> Book' old -> Book (old Map.:\ field)
+delete _ (Book bk) = Book $ Map.submap bk
+
 
 
 -- * Mapping

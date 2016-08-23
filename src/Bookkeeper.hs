@@ -14,9 +14,11 @@ module Bookkeeper
 
   -- * Initialization
    emptyBook
+
   -- * Getters
   , (?:)
   , get
+
   -- * Setters
   , set
   , (=:)
@@ -24,6 +26,9 @@ module Bookkeeper
   -- * Modifying
   , modify
   , (%:)
+
+  -- * Deleting
+  , delete
 
   -- * Types
   , Book
