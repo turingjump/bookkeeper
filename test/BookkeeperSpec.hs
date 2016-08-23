@@ -8,18 +8,25 @@ import Bookkeeper
 spec :: Spec
 spec = describe "books" $ do
 
-    {-it "allows creation" $ do-}
-      {-let _p :: Person-}
-             {-= emptyBook-}
-             {-& #name =: "Julian K. Arni"-}
-             {-& #age  =:  28-}
-      {-return ()-}
+    it "allows creation" $ do
+      let _p :: Person
+             = emptyBook
+             & #name =: "Julian K. Arni"
+             & #age  =:  28
+      typeLevelTest
+
+    it "allows creation out of order" $ do
+      let _p :: Person
+             = emptyBook
+             & #age  =:  28
+             & #name =: "Julian K. Arni"
+      typeLevelTest
 
     it "allows access" $ do
       let p :: Person
              = emptyBook
-             & set #name "Julian K. Arni"
-             & set #age 28
+             & #name =: "Julian K. Arni"
+             & #age  =:  28
       get #name p  `shouldBe` "Julian K. Arni"
 
 {-
@@ -41,3 +48,6 @@ spec = describe "books" $ do
 -}
 
 type Person = Book '[ "name" :=> String , "age" :=> Int]
+
+typeLevelTest :: Expectation
+typeLevelTest = True `shouldBe` True

@@ -11,6 +11,8 @@ module Bookkeeper
   , (=:)
   -- * Re-exports
   , (&)
+
+  , ChooseFirst(..)
   ) where
 
 import Bookkeeper.Internal
