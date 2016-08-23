@@ -1,8 +1,16 @@
 module Bookkeeper
-  ( Book
-  , emptyBook
-  , (:=>)
-  , Key
+  (
+  -- * Preamble
+-- | The examples here presume the following setup:
+--
+-- >>> import Data.Char (toUpper)
+-- >>> type Person = Book '[ "name" :=> String , "age" :=> Int ]
+-- >>> let julian :: Person = emptyBook & #age =: 28 & #name =: "Julian K. Arni"
+--
+-- The OverloadedLabels and TypeOperators extensions are also required.
+
+  -- * Initialization
+   emptyBook
   -- * Getters
   , (?:)
   , get
@@ -14,6 +22,10 @@ module Bookkeeper
   , modify
   , (%:)
 
+  -- * Types
+  , Book
+  , (:=>)
+  , Key
   -- * Re-exports
   , (&)
 

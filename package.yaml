@@ -62,3 +62,12 @@ tests:
       - Glob >= 0.7 && < 0.8
       - yaml == 0.8.*
 
+
+executables:
+  readme:
+    main:                Readme.lhs
+    ghc-options:         -pgmL markdown-unlit
+    source-dirs:         test
+    dependencies:        base >=4.9 && < 4.10
+                       , bookkeeper
+                       , markdown-unlit

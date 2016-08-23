@@ -34,6 +34,22 @@ library
       Bookkeeper.Internal
   default-language: Haskell2010
 
+executable readme
+  main-is: Readme.lhs
+  hs-source-dirs:
+      test
+  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFunctor DeriveGeneric DeriveFoldable DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs MultiParamTypeClasses KindSignatures TypeInType OverloadedStrings RankNTypes ScopedTypeVariables TypeApplications TypeFamilies TypeOperators OverloadedLabels MagicHash
+  ghc-options: -Wall -pgmL markdown-unlit
+  build-depends:
+      base >= 4.9 && < 4.10
+    , type-level-sets
+    , base >=4.9 && < 4.10 , bookkeeper , markdown-unlit
+  other-modules:
+      BookkeeperSpec
+      Doctest
+      Spec
+  default-language: Haskell2010
+
 test-suite doctest
   type: exitcode-stdio-1.0
   main-is: Doctest.hs
@@ -49,6 +65,7 @@ test-suite doctest
     , yaml == 0.8.*
   other-modules:
       BookkeeperSpec
+      Readme
       Spec
   default-language: Haskell2010
 
@@ -68,4 +85,5 @@ test-suite spec
   other-modules:
       BookkeeperSpec
       Doctest
+      Readme
   default-language: Haskell2010
