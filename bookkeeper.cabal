@@ -4,7 +4,9 @@
 
 name:           bookkeeper
 version:        0.2.0.0
+synopsis:       Anonymous records and overloaded labels
 description:    Please see README.md
+category:       Data Structures, Records
 homepage:       http://github.com/turingjump/bookkeeper#readme
 bug-reports:    https://github.com/turingjump/bookkeeper/issues
 author:         Julian K. Arni

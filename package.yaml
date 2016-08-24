@@ -1,6 +1,6 @@
 name:                bookkeeper
 version:             0.2.0.0
-synopsis:
+synopsis:            Anonymous records and overloaded labels
 description:         Please see README.md
 homepage:            http://github.com/turingjump/bookkeeper#readme
 license:             BSD3
@@ -10,6 +10,7 @@ maintainer:          jkarni@gmail.com
 copyright:           (c) Julian K. Arni
 github:              turingjump/bookkeeper
 tested-with:         GHC == 8.0.1
+category:            Data Structures, Records
 
 ghc-options: -Wall
 
