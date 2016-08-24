@@ -1,3 +1,6 @@
+# 0.2.1.0
+
+* Add 'Gettable', 'Settable', 'Modifiable' type synonyms.
 
 # 0.2.0.0
 

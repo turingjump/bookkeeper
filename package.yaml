@@ -1,5 +1,5 @@
 name:                bookkeeper
-version:             0.2.0.0
+version:             0.2.1.0
 synopsis:            Anonymous records and overloaded labels
 description:         Please see README.md
 homepage:            http://github.com/turingjump/bookkeeper#readme
@@ -72,6 +72,7 @@ executables:
     ghc-options:         -pgmL markdown-unlit -fno-warn-unused-top-binds
     source-dirs:         exec
     default-extensions:  []
+    other-modules:       []
     dependencies:        base >=4.9 && < 4.10
                        , bookkeeper
                        , markdown-unlit
