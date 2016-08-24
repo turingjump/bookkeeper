@@ -2,6 +2,7 @@ module BookkeeperSpec (spec) where
 
 import Data.Char (toUpper)
 import Test.Hspec
+import Test.QuickCheck
 
 import Bookkeeper
 
@@ -46,6 +47,12 @@ spec = describe "books" $ do
 
     it "has a decent show instance" $ do
       show p `shouldBe` "Book {age = 28, name = \"Julian K. Arni\"}"
+
+    it "obeys the 'get . put' law" $ property $ \(x :: Int) -> do
+      get #label (set #label x emptyBook) `shouldBe` x
+
+    it "obeys the 'put . put' law" $ property $ \(x :: Int) (y :: Int) -> do
+      set #label y (set #label x emptyBook) `shouldBe` set #label y emptyBook
 
 type Person = Book '[ "name" :=> String , "age" :=> Int]
 
