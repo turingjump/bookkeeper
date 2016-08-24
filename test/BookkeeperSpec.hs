@@ -44,6 +44,9 @@ spec = describe "books" $ do
       p' ?: #name `shouldBe` "Julian K. Arni"
       p' ?: #child ?: #name `shouldBe` "JULIAN K. ARNI"
 
+    it "has a decent show instance" $ do
+      show p `shouldBe` "Book {age = 28, name = \"Julian K. Arni\"}"
+
 type Person = Book '[ "name" :=> String , "age" :=> Int]
 
 

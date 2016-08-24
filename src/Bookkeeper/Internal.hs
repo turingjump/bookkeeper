@@ -5,11 +5,13 @@ module Bookkeeper.Internal where
 import GHC.OverloadedLabels
 import GHC.Generics (Generic)
 import qualified Data.Type.Map as Map
-import GHC.TypeLits (Symbol)
+import GHC.TypeLits (Symbol, KnownSymbol)
 import Data.Kind (Type)
 import Data.Type.Map (Map, Mapping((:->)))
 import Data.Coerce
 import Data.Proxy
+import Data.Monoid ((<>))
+import Data.List (intercalate)
 
 import Bookkeeper.Errors
 
@@ -19,6 +21,24 @@ type Book a = Book' (Map.AsMap a)
 
 -- | The internal representation of a Book.
 newtype Book' (a :: [Mapping Symbol Type]) = Book { getBook :: Map a }
+
+instance ShowHelper (Book' a) => Show (Book' a) where
+  show x = "Book {" <> intercalate ", " (go <$> showHelper x) <> "}"
+    where
+      go (k, v) = k <> " = " <> v
+
+class ShowHelper a where
+  showHelper :: a -> [(String, String)]
+
+instance ShowHelper (Book' '[]) where
+  showHelper _ = []
+
+instance ( ShowHelper (Book' xs)
+         , KnownSymbol k
+         , Show v
+         ) => ShowHelper (Book' ((k :=> v) ': xs)) where
+  showHelper (Book (Map.Ext k v rest)) = (show k, show v):showHelper (Book rest)
+
 
 -- | A book with no records. You'll usually want to use this to construct
 -- books.
@@ -70,9 +90,8 @@ infixl 3 ?:
 
 -- | Sets or updates a field to a value.
 --
--- >>> let julian' = set #likesDoctest True julian
--- >>> get #likesDoctest julian'
--- True
+-- >>> set #likesDoctest True julian
+-- Book {age = 28, likesDoctest = True, name = "Julian K. Arni"}
 set :: forall field val old mid1 mid2 new .
   ( Map.Unionable '[field :=> ChooseFirst val] mid1
   , Mappable ChooseFirst old mid1
@@ -92,9 +111,8 @@ set _ v (Book bk)
 
 -- | Infix version of 'set'
 --
--- >>> let julian' = julian & #age =: 29
--- >>> get #age julian'
--- 29
+-- >>> julian & #age =: 29
+-- Book {age = 29, name = "Julian K. Arni"}
 (=:) :: forall field val old mid1 mid2 new .
   ( Map.Unionable '[field :=> ChooseFirst val] mid1
   , Mappable ChooseFirst old mid1
@@ -110,9 +128,8 @@ infix 3 =:
 
 -- | Apply a function to a field.
 --
--- >>> let julian' = julian & modify #name (fmap toUpper)
--- >>> get #name julian'
--- "JULIAN K. ARNI"
+-- >>> julian & modify #name (fmap toUpper)
+-- Book {age = 28, name = "JULIAN K. ARNI"}
 --
 -- If the key does not exist, throws a type error
 -- >>> modify #height (\_ -> 132) julian
@@ -138,9 +155,8 @@ modify p f b = set p v b
 
 -- | Infix version of 'modify'.
 --
--- >>> let julian' = julian & #name %: fmap toUpper
--- >>> get #name julian'
--- "JULIAN K. ARNI"
+-- >>> julian & #name %: fmap toUpper
+-- Book {age = 28, name = "JULIAN K. ARNI"}
 (%:) :: forall field val val' old mid1 mid2 new .
   ( Map.Unionable '[field :=> ChooseFirst val'] mid1
   , Mappable ChooseFirst old mid1

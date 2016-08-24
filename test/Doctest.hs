@@ -3,8 +3,7 @@ module Main (main) where
 
 -- Runs doctest on all files in "src" dir. Assumes:
 --   (a) You are using hpack
---   (b) The top-level "default-extensions" are the only extensions besides the
---   ones in the files.
+--   (b) The library has a 'default-extensions' section
 
 import System.FilePath.Glob (glob)
 import Test.DocTest (doctest)
@@ -14,14 +13,16 @@ newtype Exts = Exts { getExts :: [String] }
   deriving (Eq, Show, Read)
 
 instance FromJSON Exts where
-  parseJSON (Object v) = Exts <$> v .: "default-extensions"
+  parseJSON (Object v) = do
+    lib <- v .: "library"
+    Exts <$> lib .: "default-extensions"
   parseJSON _ = fail "expecting object"
 
 main :: IO ()
 main = do
   hpack' <- decodeFile "package.yaml"
-  hpack <- case hpack' of
-    Nothing -> return $ Exts []
+  extensions <- case hpack' of
+    Nothing -> return $ Exts mempty
     Just v  -> return v
   files <- glob "src/**/*.hs"
-  doctest $ files ++ fmap ("-X" ++) (getExts hpack)
+  doctest $ files ++ fmap ("-X" ++) (getExts extensions)

@@ -3,7 +3,7 @@
 -- see: https://github.com/sol/hpack
 
 name:           bookkeeper
-version:        0.1.1.0
+version:        0.1.2.0
 description:    Please see README.md
 homepage:       http://github.com/turingjump/bookkeeper#readme
 bug-reports:    https://github.com/turingjump/bookkeeper/issues
@@ -38,8 +38,7 @@ executable readme
   main-is: Readme.lhs
   hs-source-dirs:
       test
-  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFunctor DeriveGeneric DeriveFoldable DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs MultiParamTypeClasses KindSignatures TypeInType OverloadedStrings RankNTypes ScopedTypeVariables TypeApplications TypeFamilies TypeOperators OverloadedLabels MagicHash
-  ghc-options: -Wall -pgmL markdown-unlit
+  ghc-options: -Wall -pgmL markdown-unlit -fno-warn-unused-top-binds
   build-depends:
       base >= 4.9 && < 4.10
     , type-level-sets
