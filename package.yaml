@@ -70,7 +70,7 @@ executables:
   readme:
     main:                Readme.lhs
     ghc-options:         -pgmL markdown-unlit -fno-warn-unused-top-binds
-    source-dirs:         test
+    source-dirs:         exec
     default-extensions:  []
     dependencies:        base >=4.9 && < 4.10
                        , bookkeeper
