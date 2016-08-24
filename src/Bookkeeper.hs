@@ -16,14 +16,17 @@ module Bookkeeper
    emptyBook
 
   -- * Getters
+  , Gettable
   , (?:)
   , get
 
   -- * Setters
+  , Settable
   , set
   , (=:)
 
   -- * Modifying
+  , Modifiable
   , modify
   , (%:)
 

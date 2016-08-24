@@ -77,6 +77,12 @@ data Key (a :: Symbol) = Key
 -- Setters and getters
 ------------------------------------------------------------------------------
 
+-- * Getters
+
+-- | @Gettable field val book@ is the constraint needed to get a value of type
+-- @val@ from the field @field@ in the book of type @Book book@.
+type Gettable field book val = (Map.Submap '[field :=> val] book, Contains book field val)
+
 -- | Get a value by key, if it exists.
 --
 -- >>> get #age julian
@@ -90,7 +96,7 @@ data Key (a :: Symbol) = Key
 -- ...    '["age" ':-> Int, "name" ':-> String]
 -- ...  • In the expression: get #moneyFrom julian
 -- ...
-get :: forall field book val. (Map.Submap '[field :=> val] book, Contains book field val)
+get :: forall field book val. (Gettable field book val)
   => Key field -> Book' book -> val
 get _ (Book bk) = case (Map.submap bk :: Map '[field :=> val]) of
         Map.Ext _ v Map.Empty -> v
@@ -99,22 +105,28 @@ get _ (Book bk) = case (Map.submap bk :: Map '[field :=> val]) of
 --
 -- >>> julian ?: #name
 -- "Julian K. Arni"
-(?:) :: forall field book val. (Map.Submap '[field :=> val] book, Contains book field val )
+(?:) :: forall field book val. (Gettable field book val)
   => Book' book -> Key field -> val
 (?:) = flip get
 infixl 3 ?:
+
+-- * Setters
+
+-- | 'Settable field val old new' is a constraint needed to set the the field
+-- 'field' to a value of type 'val' in the book of type 'Book old'. The
+-- resulting book will have type 'Book new'.
+type Settable field val old new =
+  (
+     Map.Submap (Map.AsMap (old Map.:\ field)) old
+  , Map.Unionable '[ field :=> val] (Map.AsMap (old Map.:\ field))
+  , new ~ Map.AsMap (( field :=> val) ': (Map.AsMap (old Map.:\ field)))
+  )
 
 -- | Sets or updates a field to a value.
 --
 -- >>> set #likesDoctest True julian
 -- Book {age = 28, likesDoctest = True, name = "Julian K. Arni"}
-set :: forall field val old deleted added new .
-  ( Map.Submap deleted old
-  , deleted ~ (Map.AsMap (old Map.:\ field))
-  , added ~ (( field :=> val) ': deleted)
-  , Map.Unionable '[ field :=> val] deleted
-  , new ~ Map.AsMap added
-  )
+set :: forall field val old new .  ( Settable field val old new)
   => Key field -> val -> Book' old -> Book' new
 set p v old = Book new
   where
@@ -126,17 +138,22 @@ set p v old = Book new
 --
 -- >>> julian & #age =: 29
 -- Book {age = 29, name = "Julian K. Arni"}
-(=:) :: forall field val old deleted added new .
-  ( Map.Submap deleted old
-  , deleted ~ (Map.AsMap (old Map.:\ field))
-  , added ~ (( field :=> val) ': deleted)
-  , Map.Unionable '[ field :=> val] deleted
-  , new ~ Map.AsMap added
-  )
+(=:) :: ( Settable field val old new)
   => Key field -> val -> Book' old -> Book' new
 (=:) = set
 infix 3 =:
 
+-- * Modifiers
+
+-- | @Modifiable field val val' old new@ is a constraint needed to apply a
+-- function of type @val -> val'@ to the field @field@ in the book of type
+-- @Book old@. The resulting book will have type @Book new@.
+type Modifiable field val val' old new =
+  ( Settable field val' old new
+  , Map.AsMap new ~ new
+  , Contains old field val
+  , Map.Submap '[ field :=> val] old
+  )
 
 -- | Apply a function to a field.
 --
@@ -151,18 +168,8 @@ infix 3 =:
 -- ...    '["age" ':-> Int, "name" ':-> String]
 -- ...  • In the expression: modify #height (\ _ -> 132) julian
 -- ...
-modify :: forall field val val' old deleted added new .
-  -- For setting
-  ( Map.Submap deleted old
-  , deleted ~ (Map.AsMap (old Map.:\ field))
-  , added ~ (( field :=> val') ': deleted)
-  , Map.Unionable '[ field :=> val'] deleted
-  , new ~ Map.AsMap added
-  , Map.AsMap new ~ new
-  -- For getting
-  , Contains old field val
-  , Map.Submap '[ field :=> val] old
-  ) =>  Key field -> (val -> val') -> Book' old -> Book new
+modify :: ( Modifiable field val val' old new)
+  =>  Key field -> (val -> val') -> Book' old -> Book new
 modify p f b = set p v b
   where v = f $ get p b
 
@@ -170,18 +177,8 @@ modify p f b = set p v b
 --
 -- >>> julian & #name %: fmap toUpper
 -- Book {age = 28, name = "JULIAN K. ARNI"}
-(%:) :: forall field val val' old deleted added new .
-  -- For setting
-  ( Map.Submap deleted old
-  , deleted ~ (Map.AsMap (old Map.:\ field))
-  , added ~ (( field :=> val') ': deleted)
-  , Map.Unionable '[ field :=> val'] deleted
-  , new ~ Map.AsMap added
-  , Map.AsMap new ~ new
-  -- For getting
-  , Contains old field val
-  , Map.Submap '[ field :=> val] old
-  ) =>  Key field -> (val -> val') -> Book' old -> Book new
+(%:) :: ( Modifiable field val val' old new)
+  => Key field -> (val -> val') -> Book' old -> Book new
 (%:) = modify
 infixr 3 %:
 
