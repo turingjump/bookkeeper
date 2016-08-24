@@ -1,7 +1,6 @@
 resolver: nightly-2016-05-27
 packages:
 - '.'
-- location: 'type-level-sets-0.7'
-  extra-dep: true
-extra-deps: []
+extra-deps:
+- 'type-level-sets-0.7'
 flags: {}
