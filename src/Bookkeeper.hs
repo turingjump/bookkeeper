@@ -37,10 +37,6 @@ module Bookkeeper
   -- * Re-exports
   , (&)
 
-  -- * For coercion
-  -- | These types should not be used, but need to be in scope for coercion,
-  -- which is used when setting or modifying a value.
-  , ChooseFirst(..)
   ) where
 
 import Bookkeeper.Internal

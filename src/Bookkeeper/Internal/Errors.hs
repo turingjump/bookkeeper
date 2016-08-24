@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-unticked-promoted-constructors #-}
-module Bookkeeper.Errors where
+module Bookkeeper.Internal.Errors where
 
 import qualified Data.Type.Map as Map
 import GHC.TypeLits (TypeError, ErrorMessage(..))
