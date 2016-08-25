@@ -6,6 +6,7 @@ import GHC.OverloadedLabels
 import GHC.Generics (Generic)
 import qualified Data.Type.Map as Map
 import GHC.TypeLits (Symbol, KnownSymbol)
+import Data.Default.Class (Default(..))
 import Data.Kind (Type)
 import Data.Type.Map (Map, Mapping((:->)))
 import Data.Monoid ((<>))
@@ -50,6 +51,14 @@ instance (Eq val, Eq (Book' xs)) => Eq (Book' ((field :=> val) ': xs)  ) where
 instance Monoid (Book' '[]) where
   mempty = emptyBook
   _ `mappend` _ = emptyBook
+
+instance Default (Book' '[]) where
+  def = emptyBook
+
+instance ( Default (Book' xs)
+         , Default v
+         ) => Default (Book' ((k :=> v) ': xs)) where
+  def = Book (Map.Ext Map.Var def (getBook def))
 
 -- | A book with no records. You'll usually want to use this to construct
 -- books.

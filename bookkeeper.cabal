@@ -34,6 +34,7 @@ library
   build-depends:
       base >= 4.9 && < 4.10
     , type-level-sets
+    , data-default-class
   exposed-modules:
       Bookkeeper
       Bookkeeper.Internal
