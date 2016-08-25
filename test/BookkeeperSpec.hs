@@ -31,6 +31,10 @@ spec = describe "books" $ do
              = p & #name %: fmap toUpper
       get #name p' `shouldBe` "JULIAN K. ARNI"
 
+    it "allows type-chaging update" $ do
+      let p' = p & #name %: length
+      get #name p' `shouldBe` 14
+
     it "allows extension" $ do
       let p' = #email =: "jkarni<at>turingjump<dot>com" $ p
       get #email p' `shouldBe` ("jkarni<at>turingjump<dot>com" :: String)
