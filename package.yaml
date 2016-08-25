@@ -1,5 +1,5 @@
 name:                bookkeeper
-version:             0.2.1.1
+version:             0.2.2.0
 synopsis:            Anonymous records and overloaded labels
 description:         Please see README.md
 homepage:            http://github.com/turingjump/bookkeeper#readme
@@ -20,6 +20,7 @@ ghc-options: -Wall
 dependencies:
   - base >= 4.9 && < 4.10
   - type-level-sets
+  - data-default-class
 
 
 library:
