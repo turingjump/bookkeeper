@@ -1,3 +1,7 @@
+# 0.2.2.0
+
+* Add 'Data.Default' instance
+
 # 0.2.1.0
 
 * Add 'Gettable', 'Settable', 'Modifiable' type synonyms.

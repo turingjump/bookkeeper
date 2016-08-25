@@ -3,19 +3,7 @@ module Main where
 import Bookkeeper
 import Criterion.Main
 
-type PersonB = Book '[ "name" :=> String
-    , "age" :=> Int
-    , "age1" :=> Int
-    , "age12" :=> Int
-    , "age15" :=> Int
-    , "age2" :=> Int
-    , "age10" :=> Int
-    , "age4" :=> Int
-    , "age9" :=> Int
-    , "age8" :=> Int
-    , "age3" :=> Int
-    , "age11" :=> Int
-    ]
+type PersonB = Book '[ "name" :=> String, "age" :=> Int ]
 data PersonR = PersonR { name ::  String, age :: {-# NOUNPACK #-} Int } deriving (Eq, Show)
 
 pb :: PersonB
