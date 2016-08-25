@@ -68,6 +68,16 @@ tests:
       - Glob >= 0.7 && < 0.8
       - yaml == 0.8.*
 
+benchmarks:
+  bench:
+    main:            Main.hs
+    source-dirs:     bench
+    default-extensions: *allExts
+    dependencies:
+      - bookkeeper
+      - criterion
+    ghc-options:     -O2
+
 
 executables:
   readme:
