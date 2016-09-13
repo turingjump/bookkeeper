@@ -39,8 +39,8 @@ The order in which fields are inserted or appear in types does not matter. That
 is, in:
 
 ~~~ {.haskell}
--- type A = Book '[ "field1" :=> Int, "field2" :=> Bool]
--- type B = Book '[ "field2" :=> Bool "field1" :=> Int ]
+-- type A = Book '[ "field1" :=> Int,  "field2" :=> Bool]
+-- type B = Book '[ "field2" :=> Bool, "field1" :=> Int ]
 ~~~
 
 Types `A` and `B` are the same.
