@@ -37,6 +37,10 @@ module Bookkeeper
   , Book
   , (:=>)
   , Key
+
+  -- * From Haskell record
+  , fromRecord
+
   -- * Re-exports
   , (&)
 

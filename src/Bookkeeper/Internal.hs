@@ -3,7 +3,7 @@
 module Bookkeeper.Internal where
 
 import GHC.OverloadedLabels
-import GHC.Generics (Generic)
+import GHC.Generics
 import qualified Data.Type.Map as Map
 import GHC.TypeLits (Symbol, KnownSymbol)
 import Data.Default.Class (Default(..))
@@ -126,7 +126,7 @@ infixl 3 ?:
 -- resulting book will have type 'Book new'.
 type Settable field val old new =
   (
-     Map.Submap (Map.AsMap (old Map.:\ field)) old
+    Map.Submap (Map.AsMap (old Map.:\ field)) old
   , Map.Unionable '[ field :=> val] (Map.AsMap (old Map.:\ field))
   , new ~ Map.AsMap (( field :=> val) ': (Map.AsMap (old Map.:\ field)))
   )
@@ -208,8 +208,37 @@ delete :: forall field old .
 delete _ (Book bk) = Book $ Map.submap bk
 
 
+-- * Generics
+
+class FromGeneric a book | a -> book where
+  fromGeneric :: a x -> Book' book
+
+instance FromGeneric cs book => FromGeneric (D1 m cs) book where
+  fromGeneric (M1 xs) = fromGeneric xs
+
+instance FromGeneric cs book => FromGeneric (C1 m cs) book where
+  fromGeneric (M1 xs) = fromGeneric xs
+
+instance (v ~ Map.AsMap ('[name ':-> t]))
+  => FromGeneric (S1 ('MetaSel ('Just name) p s l) (Rec0 t)) v where
+  fromGeneric (M1 (K1 t)) = (Key =: t) emptyBook
+
+instance
+  ( FromGeneric l lbook
+  , FromGeneric r rbook
+  , Map.Unionable lbook rbook
+  , book ~ Map.Union lbook rbook
+  ) => FromGeneric (l :*: r) book where
+  fromGeneric (l :*: r)
+    = Book $ Map.union (getBook (fromGeneric l)) (getBook (fromGeneric r))
+
+-- | Generate a @Book@ from an ordinary Haskell record via GHC Generics.
+fromRecord :: (Generic a, FromGeneric (Rep a) bookRep) => a -> Book' bookRep
+fromRecord = fromGeneric . from
+
 -- $setup
 -- >>> import Data.Function ((&))
 -- >>> import Data.Char (toUpper)
 -- >>> type Person = Book '[ "name" :=> String , "age" :=> Int ]
 -- >>> let julian :: Person = emptyBook & #age =: 28 & #name =: "Julian K. Arni"
+
