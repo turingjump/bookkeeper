@@ -1,4 +1,4 @@
-# next
+# 0.2.3
 
 * Implement 'fromRecord' for converting values from record.
 
