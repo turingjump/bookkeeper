@@ -1,3 +1,7 @@
+# next
+
+* Implement 'fromRecord' for converting values from record.
+
 # 0.2.2.0
 
 * Add 'Data.Default' instance

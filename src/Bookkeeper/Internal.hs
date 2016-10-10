@@ -5,7 +5,7 @@ module Bookkeeper.Internal where
 import GHC.OverloadedLabels
 import GHC.Generics
 import qualified Data.Type.Map as Map
-import GHC.TypeLits (Symbol, KnownSymbol)
+import GHC.TypeLits (Symbol, KnownSymbol, TypeError, ErrorMessage(..))
 import Data.Default.Class (Default(..))
 import Data.Kind (Type)
 import Data.Type.Map (Map, Mapping((:->)))
@@ -232,7 +232,37 @@ instance
   fromGeneric (l :*: r)
     = Book $ Map.union (getBook (fromGeneric l)) (getBook (fromGeneric r))
 
+type family Expected a where
+  Expected (l :+: r) = TypeError ('Text "Cannot convert sum types into Books")
+  Expected U1        = TypeError ('Text "Cannot convert non-record types into Books")
+
+instance (book ~ Expected (l :+: r)) => FromGeneric (l :+: r) book where
+  fromGeneric = error "impossible"
+
+instance (book ~ Expected U1) => FromGeneric U1 book where
+  fromGeneric = error "impossible"
+
+
 -- | Generate a @Book@ from an ordinary Haskell record via GHC Generics.
+--
+-- >>> data Test = Test {  field1 :: String, field2 :: Int, field3 :: Char } deriving Generic
+-- >>> fromRecord (Test "hello" 0 'c')
+-- Book {field1 = "hello", field2 = 0, field3 = 'c'}
+--
+-- Trying to convert a datatype which is not a record will result in a type
+-- error:
+--
+-- >>> data SomeSumType = LeftSide | RightSide deriving Generic
+-- >>> fromRecord LeftSide
+-- ...
+-- ... • Cannot convert sum types into Books
+-- ...
+--
+-- >>> data Unit = Unit deriving Generic
+-- >>> fromRecord Unit
+-- ...
+-- ... • Cannot convert non-record types into Books
+-- ...
 fromRecord :: (Generic a, FromGeneric (Rep a) bookRep) => a -> Book' bookRep
 fromRecord = fromGeneric . from
 
@@ -241,4 +271,3 @@ fromRecord = fromGeneric . from
 -- >>> import Data.Char (toUpper)
 -- >>> type Person = Book '[ "name" :=> String , "age" :=> Int ]
 -- >>> let julian :: Person = emptyBook & #age =: 28 & #name =: "Julian K. Arni"
-
