@@ -33,12 +33,14 @@ library
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 4.10
-    , type-level-sets
+    , mtl == 2.2.*
     , data-default-class
   exposed-modules:
       Bookkeeper
       Bookkeeper.Internal
       Bookkeeper.Internal.Errors
+      Bookkeeper.Internal.Sort
+      Bookkeeper.Internal.Types
   default-language: Haskell2010
 
 executable readme
@@ -48,7 +50,7 @@ executable readme
   ghc-options: -Wall -pgmL markdown-unlit -fno-warn-unused-top-binds
   build-depends:
       base >= 4.9 && < 4.10
-    , type-level-sets
+    , mtl == 2.2.*
     , data-default-class
     , base >=4.9 && < 4.10 , bookkeeper , markdown-unlit
   default-language: Haskell2010
@@ -62,7 +64,7 @@ test-suite doctest
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 4.10
-    , type-level-sets
+    , mtl == 2.2.*
     , data-default-class
     , doctest >= 0.9 && < 0.12
     , Glob >= 0.7 && < 0.8
@@ -81,7 +83,7 @@ test-suite spec
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 4.10
-    , type-level-sets
+    , mtl == 2.2.*
     , data-default-class
     , bookkeeper
     , hspec > 2 && < 3
@@ -100,7 +102,7 @@ benchmark bench
   ghc-options: -Wall -O2
   build-depends:
       base >= 4.9 && < 4.10
-    , type-level-sets
+    , mtl == 2.2.*
     , data-default-class
     , bookkeeper
     , criterion

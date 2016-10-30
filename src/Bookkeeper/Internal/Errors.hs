@@ -2,7 +2,7 @@
 {-# OPTIONS_GHC -fno-warn-unticked-promoted-constructors #-}
 module Bookkeeper.Internal.Errors where
 
-import qualified Data.Type.Map as Map
+{-import qualified Data.Type.Map as Map-}
 import GHC.TypeLits (TypeError, ErrorMessage(..))
 import GHC.Exts
 
@@ -16,5 +16,5 @@ type family Contains' book field orig exp :: Constraint where
               :$$: Text "Book type:"
               :$$: ShowType orig
               )
-   Contains' ((k Map.:-> v) ': m) k orig exp = (v ~ exp)
+   {-Contains' ((k Map.:-> v) ': m) k orig exp = (v ~ exp)-}
    Contains' (any ': m) k     orig exp = Contains' m k orig exp

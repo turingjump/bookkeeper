@@ -19,7 +19,7 @@ ghc-options: -Wall
 
 dependencies:
   - base >= 4.9 && < 4.10
-  - type-level-sets
+  - mtl == 2.2.*
   - data-default-class
 
 
