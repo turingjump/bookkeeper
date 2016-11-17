@@ -30,6 +30,10 @@ module Bookkeeper
   , modify
   , (%:)
 
+  -- * Union
+  , Unionable
+  , union
+
   -- * Deleting
   , delete
 
@@ -47,4 +51,6 @@ module Bookkeeper
   ) where
 
 import Bookkeeper.Internal
+import Bookkeeper.Internal.Types
 import Data.Function
+

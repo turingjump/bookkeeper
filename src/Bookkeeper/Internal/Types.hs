@@ -1,11 +1,16 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Bookkeeper.Internal.Types where
 
-import Data.Kind (Type)
-import GHC.Generics
-import GHC.TypeLits (Symbol, KnownSymbol, TypeError, ErrorMessage(..), CmpSymbol)
-import GHC.OverloadedLabels
-import Data.Default.Class (Default(..))
 import Control.Monad.Identity
+import Data.Default.Class (Default(..))
+import Data.Kind (Type)
+import Data.Monoid ((<>))
+import Data.List (intercalate)
+import Data.Proxy
+import Data.Type.Equality (type (==))
+import GHC.Generics
+import GHC.OverloadedLabels
+import GHC.TypeLits (Symbol, TypeError, ErrorMessage(Text), CmpSymbol)
 
 ------------------------------------------------------------------------------
 -- :=>
@@ -31,7 +36,11 @@ instance (s ~ s') => IsLabel s (Key s') where
 
 data Book' :: (k -> Type) -> [Type] -> Type where
   BNil :: Book' f '[]
-  BCons :: Key key -> f a -> Book' f as -> Book' f (k :=> a ': as)
+  BCons :: {-# UNPACK #-} !(Key key) -> !(f a) -> !(Book' f as) -> Book' f (k :=> a ': as)
+
+-- * Instances
+
+-- ** Eq
 
 instance Eq (Book' f '[]) where
   _ == _ = True
@@ -40,9 +49,13 @@ instance (Eq (f val), Eq (Book' f xs)) => Eq (Book' f ((field :=> val) ': xs)) w
   BCons _ value1 rest1 == BCons _ value2 rest2
     = value1 == value2 && rest1 == rest2
 
+-- ** Monoid
+
 instance Monoid (Book' Identity '[]) where
   mempty = emptyBook
   _ `mappend` _ = emptyBook
+
+-- ** Default
 
 instance Default (Book' Identity '[]) where
   def = emptyBook
@@ -57,9 +70,9 @@ instance ( Default (Book' f xs)
 emptyBook :: Book' Identity '[]
 emptyBook = BNil
 
-{-
+-- ** Show
 
-instance ShowHelper (Book' a) => Show (Book' a) where
+instance ShowHelper (Book' Identity a) => Show (Book' Identity a) where
   show x = "Book {" <> intercalate ", " (go <$> showHelper x) <> "}"
     where
       go (k, v) = k <> " = " <> v
@@ -67,20 +80,24 @@ instance ShowHelper (Book' a) => Show (Book' a) where
 class ShowHelper a where
   showHelper :: a -> [(String, String)]
 
-instance ShowHelper (Book' '[]) where
+instance ShowHelper (Book' Identity '[]) where
   showHelper _ = []
 
-instance ( ShowHelper (Book' xs)
-         , KnownSymbol k
+instance ( ShowHelper (Book' Identity xs)
          , Show v
-         ) => ShowHelper (Book' ((k :=> v) ': xs)) where
-  showHelper (Book (Map.Ext k v rest)) = (show k, show v):showHelper (Book rest)
+         ) => ShowHelper (Book' Identity ((k :=> v) ': xs)) where
+  showHelper (BCons k v rest) = (show k, show v):showHelper rest
 
--}
-
--- * Generics
+-- ** MFunctor
 
 {-
+instance MFunctor Book' where
+  hoist f book = case book of
+    BNil -> BNil
+    BCons key value rest -> BCons key (f value) (hoist f rest)
+-}
+-- ** Generics
+
 class FromGeneric a book | a -> book where
   fromGeneric :: a x -> Book' Identity book
 
@@ -90,18 +107,18 @@ instance FromGeneric cs book => FromGeneric (D1 m cs) book where
 instance FromGeneric cs book => FromGeneric (C1 m cs) book where
   fromGeneric (M1 xs) = fromGeneric xs
 
-instance (v ~ Book' Identity '[name :=> t])
+instance (v ~ '[name :=> t])
   => FromGeneric (S1 ('MetaSel ('Just name) p s l) (Rec0 t)) v where
-  fromGeneric (M1 (K1 t)) = (Key =: t) emptyBook
+  fromGeneric (M1 (K1 t)) = BCons Key (Identity t) emptyBook
 
 instance
-  ( FromGeneric l lbook
-  , FromGeneric r rbook
-  , Map.Unionable lbook rbook
-  , book ~ Map.Union lbook rbook
-  ) => FromGeneric (l :*: r) book where
+  ( FromGeneric l leftBook
+  , FromGeneric r rightBook
+  , unionBook ~ (Union leftBook rightBook)
+  , Unionable leftBook rightBook
+  ) => FromGeneric (l :*: r) unionBook where
   fromGeneric (l :*: r)
-    = Book $ Map.union (getBook (fromGeneric l)) (getBook (fromGeneric r))
+    = union (fromGeneric l) (fromGeneric r)
 
 type family Expected a where
   Expected (l :+: r) = TypeError ('Text "Cannot convert sum types into Books")
@@ -113,4 +130,104 @@ instance (book ~ Expected (l :+: r)) => FromGeneric (l :+: r) book where
 instance (book ~ Expected U1) => FromGeneric U1 book where
   fromGeneric = error "impossible"
 
-  -}
+------------------------------------------------------------------------------
+-- Internal stuff
+------------------------------------------------------------------------------
+
+-- Insertion sort for simplicity.
+type family Sort unsorted sorted where
+   Sort '[] sorted = sorted
+   Sort (key :=> value ': xs) sorted = Sort xs (Insert key value sorted)
+
+type family Insert key value oldMap where
+  Insert key value '[] = '[ key :=> value ]
+  Insert key value (key :=> someValue ': restOfMap) = (key :=> value ': restOfMap)
+  Insert key value (focusKey :=> someValue ': restOfMap)
+    = Ifte (CmpSymbol key focusKey == 'LT)
+         (key :=> value ': focusKey :=> someValue ': restOfMap)
+         (key :=> value ': focusKey :=> someValue ': restOfMap)
+
+type family Ifte cond iftrue iffalse where
+  Ifte 'True iftrue iffalse = iftrue
+  Ifte 'False iftrue iffalse = iffalse
+
+------------------------------------------------------------------------------
+-- Subset
+------------------------------------------------------------------------------
+
+class Subset set subset where
+  getSubset :: Book' f set -> Book' f subset
+
+instance Subset '[] '[] where
+  getSubset = id
+  {-# INLINE getSubset #-}
+instance {-# OVERLAPPING #-} (Subset tail1 tail2, value ~ value')
+  => Subset (key :=> value ': tail1) (key :=> value' ': tail2) where
+  getSubset (BCons key value oldBook) = BCons key value $ getSubset oldBook
+  {-# INLINE getSubset #-}
+instance {-# OVERLAPPABLE #-} (Subset tail subset) => Subset (head ': tail) subset where
+  getSubset (BCons _key _value oldBook) = getSubset oldBook
+  {-# INLINE getSubset #-}
+
+
+------------------------------------------------------------------------------
+-- Insertion
+------------------------------------------------------------------------------
+
+class Insertable key value oldMap where
+  insert :: Key key -> f value -> Book' f oldMap -> Book' f (Insert key value oldMap)
+
+instance Insertable key value '[] where
+  insert key value oldBook = BCons key value oldBook
+
+instance  {-# OVERLAPPING #-}
+  Insertable key value (key :=> someValue ': restOfMap) where
+  insert key value (BCons _ _ oldBook) = BCons key value oldBook
+
+instance {-# OVERLAPPABLE #-}
+  ( Insertable' (CmpSymbol key oldKey) key value
+     (oldKey :=> oldValue ': restOfMap)
+     (Insert key value (oldKey :=> oldValue ': restOfMap))
+  ) => Insertable key value (oldKey :=> oldValue ': restOfMap) where
+  insert key value oldBook = insert' flag key value oldBook
+    where
+      flag :: Proxy (CmpSymbol key oldKey)
+      flag = Proxy
+
+class Insertable' flag key value oldMap newMap
+  | flag key value oldMap -> newMap where
+  insert' :: Proxy flag -> Key key -> f value -> Book' f oldMap -> Book' f newMap
+
+instance Insertable' 'LT key value
+  oldMap
+  (key :=> value ': oldMap) where
+  insert' _ key value oldBook = BCons key value oldBook
+instance Insertable' 'EQ key value
+  (oldKey :=> oldValue ': restOfMap)
+  (key :=> value ': restOfMap) where
+  insert' _ key value (BCons _ _ oldBook) = BCons key value oldBook
+instance (newMap ~ Insert key value restOfMap, Insertable key value restOfMap) => Insertable' 'GT key value
+  (oldKey :=> oldValue ': restOfMap)
+  (oldKey :=> oldValue ': newMap) where
+  insert' _ key value (BCons oldKey oldValue oldBook) = BCons oldKey oldValue (insert key value oldBook)
+
+------------------------------------------------------------------------------
+-- Deletion
+------------------------------------------------------------------------------
+
+type family Delete keyToDelete oldBook where
+  Delete keyToDelete (keyToDelete :=> someValue ': xs) = xs
+  Delete keyToDelete (anotherKey :=> someValue ': xs)
+    = (anotherKey :=> someValue ': Delete keyToDelete xs)
+  Delete keyToDelete '[] = '[]
+
+------------------------------------------------------------------------------
+-- Union
+------------------------------------------------------------------------------
+
+type family Union leftBook rightBook where
+  Union leftBook '[] = leftBook
+  Union leftBook (key :=> value ': rest) = Union (Insert key value leftBook) rest
+
+class Unionable leftBook rightBook where
+  union :: Book' f leftBook -> Book' f rightBook -> Book' f (Union leftBook rightBook)
