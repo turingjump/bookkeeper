@@ -4,7 +4,7 @@ import Bookkeeper
 import Criterion.Main
 
 type PersonB = Book '[ "name" :=> String, "age" :=> Int ]
-data PersonR = PersonR { name ::  String, age :: {-# NOUNPACK #-} Int } deriving (Eq, Show)
+data PersonR = PersonR { name :: !String, age :: !Int } deriving (Eq, Show)
 
 pb :: PersonB
 pb = emptyBook
