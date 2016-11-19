@@ -39,7 +39,8 @@ type Gettable field book val = (Subset book '[ field :=> val ])
 get :: forall field book val. (Gettable field book val)
   => Key field -> Book' Identity book -> val
 get _ bk = case (getSubset bk :: Book' Identity '[field :=> val]) of
-  BCons _ (Identity v) BNil -> v
+  BCons (Identity v) BNil -> v
+{-# INLINE get #-}
 
 -- | Flipped and infix version of 'get'.
 --
@@ -49,6 +50,7 @@ get _ bk = case (getSubset bk :: Book' Identity '[field :=> val]) of
   => Book' Identity book -> Key field -> val
 (?:) = flip get
 infixl 3 ?:
+{-# INLINE (?:) #-}
 
 -- * Setters
 
@@ -62,6 +64,7 @@ type Settable field value oldBook = Insertable field value oldBook
 -- Book {age = 28, likesDoctest = True, name = "Julian K. Arni"}
 set :: ( Insertable key value old ) => Key key -> value -> Book' Identity old -> Book' Identity (Insert key value old)
 set key value = insert key (Identity value)
+{-# INLINE set #-}
 
 -- | Infix version of 'set'
 --
@@ -70,6 +73,7 @@ set key value = insert key (Identity value)
 (=:) :: ( Insertable key value old ) => Key key -> value -> Book' Identity old -> Book' Identity (Insert key value old)
 (=:) = set
 infix 3 =:
+{-# INLINE (=:) #-}
 
 -- * Modifiers
 
@@ -99,6 +103,7 @@ modify :: (Modifiable key originalValue newValue originalBook)
   -> Book' Identity (Insert key newValue originalBook)
 modify p f b = set p v b
   where v = f $ get p b
+{-# INLINE modify #-}
 
 -- | Infix version of 'modify'.
 --
@@ -109,6 +114,7 @@ modify p f b = set p v b
   -> Book' Identity (Insert key newValue originalBook)
 (%:) = modify
 infixr 3 %:
+{-# INLINE (%:) #-}
 
 
 type Deletable key oldBook = Subset oldBook (Delete key oldBook)
@@ -126,6 +132,7 @@ delete :: forall key oldBook f .
         ( Deletable key oldBook
         ) => Key key -> Book' f oldBook -> Book' f (Delete key oldBook)
 delete _ bk = getSubset bk
+{-# INLINE delete #-}
 
 
 -- | Generate a @Book@ from an ordinary Haskell record via GHC Generics.

@@ -29,6 +29,7 @@ data Key (a :: Symbol) = Key
 
 instance (s ~ s') => IsLabel s (Key s') where
   fromLabel _ = Key
+  {-# INLINE fromLabel #-}
 
 ------------------------------------------------------------------------------
 -- Book
@@ -36,7 +37,7 @@ instance (s ~ s') => IsLabel s (Key s') where
 
 data Book' :: (k -> Type) -> [Type] -> Type where
   BNil :: Book' f '[]
-  BCons :: {-# UNPACK #-} !(Key key) -> !(f a) -> !(Book' f as) -> Book' f (k :=> a ': as)
+  BCons :: !(f a) -> !(Book' f as) -> Book' f (k :=> a ': as)
 
 -- * Instances
 
@@ -46,7 +47,7 @@ instance Eq (Book' f '[]) where
   _ == _ = True
 
 instance (Eq (f val), Eq (Book' f xs)) => Eq (Book' f ((field :=> val) ': xs)) where
-  BCons _ value1 rest1 == BCons _ value2 rest2
+  BCons value1 rest1 == BCons value2 rest2
     = value1 == value2 && rest1 == rest2
 
 -- ** Monoid
@@ -63,7 +64,7 @@ instance Default (Book' Identity '[]) where
 instance ( Default (Book' f xs)
          , Default (f v)
          ) => Default (Book' f ((k :=> v) ': xs)) where
-  def = BCons Key def def
+  def = BCons def def
 
 -- | A book with no records. You'll usually want to use this to construct
 -- books.
@@ -86,7 +87,10 @@ instance ShowHelper (Book' Identity '[]) where
 instance ( ShowHelper (Book' Identity xs)
          , Show v
          ) => ShowHelper (Book' Identity ((k :=> v) ': xs)) where
-  showHelper (BCons k v rest) = (show k, show v):showHelper rest
+  showHelper (BCons v rest) = (show k, show v):showHelper rest
+    where
+      k :: Key k
+      k = Key
 
 -- ** MFunctor
 
@@ -109,7 +113,7 @@ instance FromGeneric cs book => FromGeneric (C1 m cs) book where
 
 instance (v ~ '[name :=> t])
   => FromGeneric (S1 ('MetaSel ('Just name) p s l) (Rec0 t)) v where
-  fromGeneric (M1 (K1 t)) = BCons Key (Identity t) emptyBook
+  fromGeneric (M1 (K1 t)) = BCons (Identity t) emptyBook
 
 instance
   ( FromGeneric l leftBook
@@ -145,7 +149,7 @@ type family Insert key value oldMap where
   Insert key value (focusKey :=> someValue ': restOfMap)
     = Ifte (CmpSymbol key focusKey == 'LT)
          (key :=> value ': focusKey :=> someValue ': restOfMap)
-         (key :=> value ': focusKey :=> someValue ': restOfMap)
+         (focusKey :=> someValue ': Insert key value restOfMap)
 
 type family Ifte cond iftrue iffalse where
   Ifte 'True iftrue iffalse = iftrue
@@ -163,10 +167,10 @@ instance Subset '[] '[] where
   {-# INLINE getSubset #-}
 instance {-# OVERLAPPING #-} (Subset tail1 tail2, value ~ value')
   => Subset (key :=> value ': tail1) (key :=> value' ': tail2) where
-  getSubset (BCons key value oldBook) = BCons key value $ getSubset oldBook
+  getSubset (BCons value oldBook) = BCons value $ getSubset oldBook
   {-# INLINE getSubset #-}
 instance {-# OVERLAPPABLE #-} (Subset tail subset) => Subset (head ': tail) subset where
-  getSubset (BCons _key _value oldBook) = getSubset oldBook
+  getSubset (BCons _value oldBook) = getSubset oldBook
   {-# INLINE getSubset #-}
 
 
@@ -178,11 +182,13 @@ class Insertable key value oldMap where
   insert :: Key key -> f value -> Book' f oldMap -> Book' f (Insert key value oldMap)
 
 instance Insertable key value '[] where
-  insert key value oldBook = BCons key value oldBook
+  insert _key value oldBook = BCons value oldBook
+  {-# INLINE insert #-}
 
 instance  {-# OVERLAPPING #-}
   Insertable key value (key :=> someValue ': restOfMap) where
-  insert key value (BCons _ _ oldBook) = BCons key value oldBook
+  insert _key value (BCons _ oldBook) = BCons value oldBook
+  {-# INLINE insert #-}
 
 instance {-# OVERLAPPABLE #-}
   ( Insertable' (CmpSymbol key oldKey) key value
@@ -193,23 +199,28 @@ instance {-# OVERLAPPABLE #-}
     where
       flag :: Proxy (CmpSymbol key oldKey)
       flag = Proxy
+  {-# INLINE insert #-}
 
 class Insertable' flag key value oldMap newMap
-  | flag key value oldMap -> newMap where
+  {-| flag key value oldMap -> newMap -}
+  where
   insert' :: Proxy flag -> Key key -> f value -> Book' f oldMap -> Book' f newMap
 
 instance Insertable' 'LT key value
   oldMap
   (key :=> value ': oldMap) where
-  insert' _ key value oldBook = BCons key value oldBook
+  insert' _ _key value oldBook = BCons value oldBook
+  {-# INLINE insert' #-}
 instance Insertable' 'EQ key value
-  (oldKey :=> oldValue ': restOfMap)
+  (key :=> oldValue ': restOfMap)
   (key :=> value ': restOfMap) where
-  insert' _ key value (BCons _ _ oldBook) = BCons key value oldBook
+  insert' _ _key value (BCons _ oldBook) = BCons value oldBook
+  {-# INLINE insert' #-}
 instance (newMap ~ Insert key value restOfMap, Insertable key value restOfMap) => Insertable' 'GT key value
   (oldKey :=> oldValue ': restOfMap)
   (oldKey :=> oldValue ': newMap) where
-  insert' _ key value (BCons oldKey oldValue oldBook) = BCons oldKey oldValue (insert key value oldBook)
+  insert' _ key value (BCons oldValue oldBook) = BCons oldValue (insert key value oldBook)
+  {-# INLINE insert' #-}
 
 ------------------------------------------------------------------------------
 -- Deletion

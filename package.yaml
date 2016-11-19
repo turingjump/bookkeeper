@@ -90,3 +90,11 @@ executables:
     dependencies:        base >=4.9 && < 4.10
                        , bookkeeper
                        , markdown-unlit
+  compileTime:
+    main:                CompileTime.hs
+    ghc-options:         -Wall
+    source-dirs:         exec
+    default-extensions: *allExts
+    other-modules:       []
+    dependencies:        base >=4.9 && < 4.10
+                       , bookkeeper

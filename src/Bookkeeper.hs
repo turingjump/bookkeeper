@@ -53,4 +53,3 @@ module Bookkeeper
 import Bookkeeper.Internal
 import Bookkeeper.Internal.Types
 import Data.Function
-
