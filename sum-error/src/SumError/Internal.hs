@@ -40,11 +40,17 @@ runSumError :: SumError ledger a -> Either (Ledger' Identity ledger) a
 runSumError (SumErrorT e) = runIdentity $ runExceptT e
 
 -- | If all errors have been caught, this can be safely converted to a value.
-resolve :: Monad m => SumErrorT '[] m a -> m a
-resolve e = do
+resolveT :: Monad m => SumErrorT '[] m a -> m a
+resolveT e = do
   Right val <- runSumErrorT e
   return val
 
+-- | Like 'resolveT', but for 'SumEror'
+resolve :: SumError '[] a -> a
+resolve = runIdentity . resolveT
+
+-- | @MonadSumError m error value@ indicates that monad @m@ allows throwing
+-- a labelled error value of type @value@ and label @error@.
 class (Monad m ) => MonadSumError m error value | m error -> value where
    throwSumError :: Key error -> value -> m a
 
@@ -52,7 +58,11 @@ instance (Optionable error value ledger, Monad m)
     => MonadSumError (SumErrorT ledger m) error value where
   throwSumError key errorValue = SumErrorT (throwError $ option key $ errorValue)
 
-class MonadSumError m error value
+-- | @MonadCatchError m m' error value@ indicates that monad @m@ allows
+-- catching errores of type @value labelled by @error@. The resulting monad may
+-- differ from the original monad by e.g. having the corresponding exception
+-- removed.
+class (Monad m', MonadSumError m error value)
   => MonadCatchSumError m m' error value | m error -> m', m' error value -> m where
   catchSumError :: Key error -> (value -> m' a) -> m a -> m' a
 

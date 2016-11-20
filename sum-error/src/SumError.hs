@@ -1,9 +1,12 @@
 module SumError
-  ( SumErrorT
+  ( SumError
+  , SumErrorT
+  , runSumError
   , runSumErrorT
   , resolve
-  , MonadSumError(..)
-  , MonadCatchSumError(..)
+  , resolveT
+  , MonadSumError(throwSumError)
+  , MonadCatchSumError(catchSumError)
   ) where
 
 import SumError.Internal

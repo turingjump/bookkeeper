@@ -13,9 +13,9 @@ spec = describe "SumErrorT" $ do
          $ catchSumError #notPositive (\_ -> return 202)
          $ catchSumError #notEven (\_ -> return 204)
          $ eg n
-    fn 1 `shouldBe` Identity 204
-    fn (-2) `shouldBe` Identity 202
-    fn 10 `shouldBe` Identity 200
+    fn 1 `shouldBe` 204
+    fn (-2) `shouldBe` 202
+    fn 10 `shouldBe` 200
 
 eg :: ( MonadSumError m "notPositive" ()
       , MonadSumError m "notEven" ()
