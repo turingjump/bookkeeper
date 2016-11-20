@@ -1,6 +1,7 @@
 module BookkeeperSpec (spec) where
 
 import Data.Char (toUpper)
+import Data.Either (isLeft)
 import Test.Hspec
 import Test.QuickCheck
 
@@ -55,7 +56,7 @@ bookSpec = describe "books" $ do
       p' ?: #child ?: #name `shouldBe` "JULIAN K. ARNI"
 
     it "has a decent show instance" $ do
-      show p `shouldBe` "Book {age = 28, name = \"Julian K. Arni\"}"
+      show p `shouldBe` "Book {#age = Identity 28, #name = Identity \"Julian K. Arni\"}"
 
     it "obeys the 'get . put' law" $ property $ \(x :: Int) -> do
       get #label (set #label x emptyBook) `shouldBe` x
@@ -71,6 +72,7 @@ ledgerSpec = describe "ledger" $ do
 
   let aBool :: BaseType
       aBool = option #bool True
+
       anInt :: BaseType
       anInt = option #int 5
 
@@ -78,7 +80,14 @@ ledgerSpec = describe "ledger" $ do
     getIf #bool aBool `shouldBe` Just True
     getIf #bool anInt `shouldBe` Nothing
 
+  it "allows splitting" $ do
+    split #bool aBool `shouldBe` Right True
+    split #bool anInt `shouldSatisfy` isLeft
+
 type BaseType = Ledger '[ "bool" :=> Bool, "int" :=> Int]
+
+type Error = '[ "err1" :=> String, "err2" :=> String]
+type ErrOrVal = ("value" :=> Int ) ': Error
 
 typeLevelTest :: Expectation
 typeLevelTest = True `shouldBe` True

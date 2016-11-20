@@ -42,7 +42,9 @@ module Bookkeeper
 
   -- ** Split
   , Split
+  , split
   , getIf
+
 
   -- ** Option
   , Optionable
