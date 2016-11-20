@@ -84,10 +84,10 @@ ledgerSpec = describe "ledger" $ do
     split #bool aBool `shouldBe` Right True
     split #bool anInt `shouldSatisfy` isLeft
 
-type BaseType = Ledger '[ "bool" :=> Bool, "int" :=> Int]
+  it "has a decent show instance" $ do
+    show aBool `shouldBe` "option' #bool (Identity True)"
 
-type Error = '[ "err1" :=> String, "err2" :=> String]
-type ErrOrVal = ("value" :=> Int ) ': Error
+type BaseType = Ledger '[ "bool" :=> Bool, "int" :=> Int]
 
 typeLevelTest :: Expectation
 typeLevelTest = True `shouldBe` True
