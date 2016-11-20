@@ -1,0 +1,8 @@
+resolver: lts-7.9
+packages:
+- '.'
+- '../bookkeeper'
+  extra-dep: true
+extra-deps: []
+flags: {}
+extra-package-dbs: []
