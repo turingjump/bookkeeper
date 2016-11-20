@@ -169,6 +169,8 @@ instance
     where
       key :: Key key
       key = Key
+  -- This isn't really impossible, since sum-errors catches errors down to
+  -- this.
   show (There _) = error "impossible"
 
 instance

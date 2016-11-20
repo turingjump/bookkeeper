@@ -22,6 +22,8 @@ newtype SumErrorT ledger m a = SumErrorT ( ExceptT (Ledger' Identity ledger) m a
            , MonadError (Ledger' Identity ledger), MonadState s, MonadWriter r
            , MonadReader r, MonadCont, MonadFix, MonadRWS r w s)
 
+type SumError ledger a = SumErrorT ledger Identity a
+
 deriving instance (Ord a, Ord1 m, Ord (Ledger' Identity ledger))
   => Ord (SumErrorT ledger m a)
 deriving instance (Ord1 m, Ord (Ledger' Identity ledger))
@@ -34,7 +36,10 @@ deriving instance (Eq1 m, Eq (Ledger' Identity ledger))
 runSumErrorT :: SumErrorT ledger m a -> m (Either (Ledger' Identity ledger) a)
 runSumErrorT (SumErrorT e) = runExceptT e
 
+runSumError :: SumError ledger a -> Either (Ledger' Identity ledger) a
+runSumError (SumErrorT e) = runIdentity $ runExceptT e
 
+-- | If all errors have been caught, this can be safely converted to a value.
 resolve :: Monad m => SumErrorT '[] m a -> m a
 resolve e = do
   Right val <- runSumErrorT e
@@ -62,5 +67,3 @@ instance (ledger' ~ Delete key ledger, Monad m, Optionable key value ledger
         -- this could be prettier
         Right err1 -> runSumErrorT $ handler err1
         Left err2  -> runSumErrorT $ throwError err2
-
-
