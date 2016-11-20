@@ -163,8 +163,8 @@ instance (Eq (f val), Eq (Ledger' f xs)) => Eq (Ledger' f ((field :=> val) ': xs
     (_          , _          ) -> False
 
 instance
-  (KnownSymbol key, Show value)
-  => Show (Ledger' Identity '[key :=> value]) where
+  (KnownSymbol key, Show (f value))
+  => Show (Ledger' f '[key :=> value]) where
   show (Here x) = "option' " ++ show key ++ " (" ++ show x ++ ")"
     where
       key :: Key key
@@ -172,13 +172,24 @@ instance
   show (There _) = error "impossible"
 
 instance
-  (KnownSymbol key, Show value, Show (Ledger' Identity (next ': restOfMap)))
-  => Show (Ledger' Identity (key :=> value ': next ': restOfMap)) where
+  (KnownSymbol key, Show (f value), Show (Ledger' f (next ': restOfMap)))
+  => Show (Ledger' f (key :=> value ': next ': restOfMap)) where
   show (Here x) = "option' " ++ show key ++ " (" ++ show x ++ ")"
     where
       key :: Key key
       key = Key
   show (There x) = show x
+
+instance Ord (f value) => Ord (Ledger' f '[ key :=> value]) where
+  Here x <= Here y = x <= y
+  _ <= _ = error "impossible"
+
+instance (Ord (f value), Ord (Ledger' f rest))
+  => Ord (Ledger' f (key :=> value ': rest)) where
+  Here x <= Here y = x <= y
+  Here _ <= There _ = True
+  There _ <= Here _ = False
+  There x <= There y = x <= y
 
 ------------------------------------------------------------------------------
 -- Internal stuff

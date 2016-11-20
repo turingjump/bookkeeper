@@ -1,9 +1,16 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module SumError.Internal where
 
 import Bookkeeper
 import Bookkeeper.Internal.Types (Ledger')
+import Data.Functor.Classes
+import Control.Monad.Cont
+import Control.Monad.State
+import Control.Monad.Writer
+import Control.Monad.Reader
+import Control.Monad.RWS
 
 import Data.Functor.Identity
 import Control.Monad.Except
@@ -12,7 +19,17 @@ import Control.Monad.Except
 -- The type is kept opaque to ensure the error types are sorted and nubbed.
 newtype SumErrorT ledger m a = SumErrorT ( ExceptT (Ledger' Identity ledger) m a )
   deriving (Functor, Applicative, Monad, MonadIO, Foldable, Traversable
-           , MonadError (Ledger' Identity ledger))
+           , MonadError (Ledger' Identity ledger), MonadState s, MonadWriter r
+           , MonadReader r, MonadCont, MonadFix, MonadRWS r w s)
+
+deriving instance (Ord a, Ord1 m, Ord (Ledger' Identity ledger))
+  => Ord (SumErrorT ledger m a)
+deriving instance (Ord1 m, Ord (Ledger' Identity ledger))
+  => Ord1 (SumErrorT ledger m)
+deriving instance (Eq a, Eq1 m, Eq (Ledger' Identity ledger))
+  => Eq (SumErrorT ledger m a)
+deriving instance (Eq1 m, Eq (Ledger' Identity ledger))
+  => Eq1 (SumErrorT ledger m)
 
 runSumErrorT :: SumErrorT ledger m a -> m (Either (Ledger' Identity ledger) a)
 runSumErrorT (SumErrorT e) = runExceptT e
