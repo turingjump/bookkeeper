@@ -3,7 +3,7 @@
 -- see: https://github.com/sol/hpack
 
 name:           bookkeeper
-version:        0.2.3
+version:        0.3
 synopsis:       Anonymous records and overloaded labels
 description:    Please see README.md
 category:       Data Structures, Records
@@ -17,10 +17,6 @@ license-file:   LICENSE
 tested-with:    GHC == 8.0.1
 build-type:     Simple
 cabal-version:  >= 1.10
-
-extra-source-files:
-    CHANGELOG.md
-    README.md
 
 source-repository head
   type: git

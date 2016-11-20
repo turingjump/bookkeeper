@@ -36,6 +36,7 @@ module Bookkeeper
 
   -- * Deleting
   , delete
+  , Delete
 
   -- * Ledger
   , Ledger

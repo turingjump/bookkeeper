@@ -1,9 +1,9 @@
--- This file has been generated from package.yaml by hpack version 0.14.0.
+-- This file has been generated from package.yaml by hpack version 0.14.1.
 --
 -- see: https://github.com/sol/hpack
 
 name:           sum-error
-version:        0.1.0.0
+version:        0.3
 description:    Please see README.md
 homepage:       http://github.com/jkarni/sum-error#readme
 bug-reports:    https://github.com/jkarni/sum-error/issues
@@ -23,11 +23,15 @@ source-repository head
 library
   hs-source-dirs:
       src
-  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables TypeFamilies TypeOperators
+  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables OverloadedLabels TypeFamilies TypeOperators
   ghc-options: -Wall
   build-depends:
-      base >= 4.7 && < 4.10
-    , text
+      base >= 4.9 && < 4.10
+    , bookkeeper >= 0.3 && < 0.4
+    , mtl == 2.*
+  exposed-modules:
+      SumError
+      SumError.Internal
   default-language: Haskell2010
 
 test-suite doctest
@@ -35,16 +39,18 @@ test-suite doctest
   main-is: Doctest.hs
   hs-source-dirs:
       test
-  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables TypeFamilies TypeOperators
+  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables OverloadedLabels TypeFamilies TypeOperators
   ghc-options: -Wall
   build-depends:
-      base >= 4.7 && < 4.10
-    , text
+      base >= 4.9 && < 4.10
+    , bookkeeper >= 0.3 && < 0.4
+    , mtl == 2.*
     , doctest >= 0.9 && < 0.12
     , Glob >= 0.7 && < 0.8
     , yaml == 0.8.*
   other-modules:
       Spec
+      SumErrorSpec
   default-language: Haskell2010
 
 test-suite spec
@@ -52,14 +58,16 @@ test-suite spec
   main-is: Spec.hs
   hs-source-dirs:
       test
-  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables TypeFamilies TypeOperators
+  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables OverloadedLabels TypeFamilies TypeOperators
   ghc-options: -Wall
   build-depends:
-      base >= 4.7 && < 4.10
-    , text
+      base >= 4.9 && < 4.10
+    , bookkeeper >= 0.3 && < 0.4
+    , mtl == 2.*
     , sum-error
     , hspec > 2 && < 3
     , QuickCheck >= 2.8 && < 2.9
   other-modules:
       Doctest
+      SumErrorSpec
   default-language: Haskell2010

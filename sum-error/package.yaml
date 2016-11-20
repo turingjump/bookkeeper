@@ -1,5 +1,5 @@
 name:                sum-error
-version:             0.1.0.0
+version:             "0.3"
 synopsis:
 description:         Please see README.md
 homepage:            http://github.com/jkarni/sum-error#readme
@@ -15,7 +15,8 @@ ghc-options: -Wall
 
 dependencies:
   - base >= 4.9 && < 4.10
-  - bookkeeper > 0.3 && < 0.4
+  - bookkeeper >= 0.3 && < 0.4
+  - mtl == 2.*
 
 default-extensions:
   - AutoDeriveTypeable
@@ -35,6 +36,7 @@ default-extensions:
   - OverloadedStrings
   - RankNTypes
   - ScopedTypeVariables
+  - OverloadedLabels
   - TypeFamilies
   - TypeOperators
 
