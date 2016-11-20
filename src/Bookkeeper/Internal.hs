@@ -12,6 +12,7 @@ import Bookkeeper.Internal.Types
 -- yet have the underlying value always have sorted fields.
 type Book xs = Book' Identity (Sort xs '[])
 
+type Ledger ledger = Ledger' Identity (Sort ledger '[])
 
 ------------------------------------------------------------------------------
 -- Setters and getters

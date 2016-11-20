@@ -1,4 +1,7 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 module Bookkeeper.Internal.Types where
 
 import Control.Monad.Identity
@@ -135,6 +138,24 @@ instance (book ~ Expected U1) => FromGeneric U1 book where
   fromGeneric = error "impossible"
 
 ------------------------------------------------------------------------------
+-- Ledger
+------------------------------------------------------------------------------
+
+
+data Ledger' :: (k -> Type) -> [Type] -> Type where
+  Here :: !(f value) -> Ledger' f ( field :=> value ': restOfLedger)
+  There :: Ledger' f restOfLedger -> Ledger' f ( field :=> value ': restOfLedger)
+
+instance Eq (Ledger' f '[]) where
+  _ == _ = True
+
+instance (Eq (f val), Eq (Ledger' f xs)) => Eq (Ledger' f ((field :=> val) ': xs)) where
+  a == b = case (a, b) of
+    (Here value1, Here value2) -> value1 == value2
+    (There rest1, There rest2) -> rest1 == rest2
+    (_          , _          ) -> False
+
+------------------------------------------------------------------------------
 -- Internal stuff
 ------------------------------------------------------------------------------
 
@@ -202,7 +223,7 @@ instance {-# OVERLAPPABLE #-}
   {-# INLINE insert #-}
 
 class Insertable' flag key value oldMap newMap
-  {-| flag key value oldMap -> newMap -}
+  | flag key value oldMap -> newMap
   where
   insert' :: Proxy flag -> Key key -> f value -> Book' f oldMap -> Book' f newMap
 
@@ -221,6 +242,51 @@ instance (newMap ~ Insert key value restOfMap, Insertable key value restOfMap) =
   (oldKey :=> oldValue ': newMap) where
   insert' _ key value (BCons oldValue oldBook) = BCons oldValue (insert key value oldBook)
   {-# INLINE insert' #-}
+
+------------------------------------------------------------------------------
+-- Option
+------------------------------------------------------------------------------
+
+class Optionable key value newMap | key newMap -> value where
+  option' :: Key key -> f value -> Ledger' f newMap
+
+instance {-# OVERLAPPING #-} Optionable key value (key :=> value ': restOfMap) where
+  option' _key value = Here value
+instance {-# OVERLAPPABLE #-}
+  ( Optionable key value restOfMap
+  ) => Optionable key value (oldKey :=> oldValue ': restOfMap) where
+  option' key value = There (option' key value)
+
+option :: (Optionable key value newMap) => Key key -> value -> Ledger' Identity newMap
+option key value = option' key (Identity value)
+
+------------------------------------------------------------------------------
+-- Split
+------------------------------------------------------------------------------
+
+class Split key map value | key map -> value where
+  split :: Key key -> Ledger' f map
+      -> Either (f value) (Ledger' f (Delete key map))
+
+instance {-# OVERLAPPING #-} Split key (key :=> value ': restOfMap) value where
+  split _ ledger = case ledger of
+    Here x -> Left x
+    There y -> Right y
+
+instance {-# OVERLAPPABLE #-}
+   ( Delete key (otherKey :=> otherValue ': restOfMap)
+   ~ (otherKey :=> otherValue ': Delete key restOfMap)
+   , Split key restOfMap value
+   )
+    => Split key (otherKey :=> otherValue ': restOfMap) value where
+  split key ledger = case ledger of
+    Here x -> Right (Here x)
+    There y -> There <$> split key y
+
+getIf :: (Split key map value) => Key key -> Ledger' Identity map -> Maybe value
+getIf key ledger = case split key ledger of
+  Left e -> Just $ runIdentity e
+  Right _ -> Nothing
 
 ------------------------------------------------------------------------------
 -- Deletion
@@ -242,3 +308,11 @@ type family Union leftBook rightBook where
 
 class Unionable leftBook rightBook where
   union :: Book' f leftBook -> Book' f rightBook -> Book' f (Union leftBook rightBook)
+
+------------------------------------------------------------------------------
+-- TypeOf
+------------------------------------------------------------------------------
+
+{-type family TypeOf (key :: Symbol) (map :: [Type]) where-}
+  {-TypeOf key (key :=> value ': restOfMap) = value-}
+  {-TypeOf key (otherKey :=> otherValue ': restOfMap) = TypeOf key restOfMap-}

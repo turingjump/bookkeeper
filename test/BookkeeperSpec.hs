@@ -7,7 +7,12 @@ import Test.QuickCheck
 import Bookkeeper
 
 spec :: Spec
-spec = describe "books" $ do
+spec = do
+  bookSpec
+  ledgerSpec
+
+bookSpec :: Spec
+bookSpec = describe "books" $ do
     let p :: Person
            = emptyBook
            & #name =: "Julian K. Arni"
@@ -60,6 +65,20 @@ spec = describe "books" $ do
 
 type Person = Book '[ "name" :=> String , "age" :=> Int]
 
+
+ledgerSpec :: Spec
+ledgerSpec = describe "ledger" $ do
+
+  let aBool :: BaseType
+      aBool = option #bool True
+      anInt :: BaseType
+      anInt = option #int 5
+
+  it "allows getting" $ do
+    getIf #bool aBool `shouldBe` Just True
+    getIf #bool anInt `shouldBe` Nothing
+
+type BaseType = Ledger '[ "bool" :=> Bool, "int" :=> Int]
 
 typeLevelTest :: Expectation
 typeLevelTest = True `shouldBe` True

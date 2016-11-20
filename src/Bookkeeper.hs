@@ -37,6 +37,17 @@ module Bookkeeper
   -- * Deleting
   , delete
 
+  -- * Ledger
+  , Ledger
+
+  -- ** Split
+  , Split
+  , getIf
+
+  -- ** Option
+  , Optionable
+  , option
+
   -- * Types
   , Book
   , (:=>)
