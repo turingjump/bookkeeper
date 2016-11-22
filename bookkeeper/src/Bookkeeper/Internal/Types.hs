@@ -193,6 +193,10 @@ instance (Ord (f value), Ord (Ledger' f rest))
   There _ <= Here _ = False
   There x <= There y = x <= y
 
+{-instance Generic (Ledger' Identity '[key :=> value]) where-}
+  {-type Rep (Ledger' Identity '[key :=> value]) =-}
+  {-from (Here x) = L1 _-}
+
 ------------------------------------------------------------------------------
 -- Internal stuff
 ------------------------------------------------------------------------------
