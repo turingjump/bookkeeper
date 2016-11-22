@@ -20,6 +20,7 @@ dependencies:
   - text >= 1 && < 2
   - hasql-class >= 0.0.1 && < 0.0.2
   - hasql >= 0.19 && < 0.20
+  - hasql-pool >= 0.4 && < 0.5
   - template-haskell >= 2.11 && < 2.12
   - bytestring >= 0.10 && < 0.11
 
@@ -44,6 +45,8 @@ default-extensions:
   - TupleSections
   - TypeFamilies
   - TypeOperators
+  - OverloadedLabels
+  - MagicHash
 
 library:
   source-dirs:      src

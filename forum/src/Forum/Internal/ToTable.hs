@@ -4,11 +4,9 @@ module Forum.Internal.ToTable where
 import Bookkeeper
 import Data.Bifunctor (second)
 import Hasql.Class (Encodable, Decodable)
-import GHC.Generics (Generic)
 import Data.Proxy (Proxy(..))
 import GHC.TypeLits
 import qualified Data.Text as T
-import qualified Database.HsSqlPpp.Syntax as Sql
 import qualified Database.HsSqlPpp.Types as Sql
 import qualified Database.HsSqlPpp.Catalog as Sql
 

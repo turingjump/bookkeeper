@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Forum.Internal.SQL where
 
+import Data.Proxy (Proxy)
 import qualified Data.ByteString.Char8 as BS
 import qualified Hasql.Query as Hasql
 import qualified Hasql.Class as Hasql
@@ -12,6 +13,8 @@ import qualified Language.Haskell.TH.Quote as TH
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as LT
+
+import Forum.Internal.Types
 
 parseSQL :: String -> Either Sql.ParseErrorExtra ([Sql.Statement], [String])
 parseSQL s = (, reverse params) <$> parsed
@@ -38,8 +41,11 @@ makeStatement stmt' params = [e| Hasql.stmtList (BS.pack $stmt) True |]
   where
     stmt = TH.liftString stmt'
 
-sql :: Sql.Catalog -> TH.QuasiQuoter
-sql catalog = TH.QuasiQuoter
+sqlQQFor :: Proxy a -> TH.QuasiQuoter
+sqlQQFor _ = undefined
+
+sqlQQForSchema :: Sql.Catalog -> TH.QuasiQuoter
+sqlQQForSchema catalog = TH.QuasiQuoter
   { TH.quoteExp = \s -> case parseSQL s of
       Left err -> error $ show err
       Right (_, params) -> makeStatement s params
@@ -47,3 +53,9 @@ sql catalog = TH.QuasiQuoter
   , TH.quoteDec = undefined
   , TH.quoteType = undefined
   }
+
+getOrCreateDB :: String -> Proxy (a :: *) -> IO DB
+getOrCreateDB = undefined
+
+deleteDB :: DB -> IO ()
+deleteDB = undefined

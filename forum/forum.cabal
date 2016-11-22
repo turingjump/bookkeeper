@@ -23,7 +23,7 @@ source-repository head
 library
   hs-source-dirs:
       src
-  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables TupleSections TypeFamilies TypeOperators
+  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables TupleSections TypeFamilies TypeOperators OverloadedLabels MagicHash
   ghc-options: -Wall
   build-depends:
       base >= 4.7 && < 4.10
@@ -32,9 +32,11 @@ library
     , text >= 1 && < 2
     , hasql-class >= 0.0.1 && < 0.0.2
     , hasql >= 0.19 && < 0.20
+    , hasql-pool >= 0.4 && < 0.5
     , template-haskell >= 2.11 && < 2.12
     , bytestring >= 0.10 && < 0.11
   exposed-modules:
+      Forum
       Forum.Internal
       Forum.Internal.SQL
       Forum.Internal.ToTable
@@ -46,7 +48,7 @@ test-suite doctest
   main-is: Doctest.hs
   hs-source-dirs:
       test
-  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables TupleSections TypeFamilies TypeOperators
+  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables TupleSections TypeFamilies TypeOperators OverloadedLabels MagicHash
   ghc-options: -Wall
   build-depends:
       base >= 4.7 && < 4.10
@@ -55,6 +57,7 @@ test-suite doctest
     , text >= 1 && < 2
     , hasql-class >= 0.0.1 && < 0.0.2
     , hasql >= 0.19 && < 0.20
+    , hasql-pool >= 0.4 && < 0.5
     , template-haskell >= 2.11 && < 2.12
     , bytestring >= 0.10 && < 0.11
     , doctest >= 0.9 && < 0.12
@@ -62,6 +65,7 @@ test-suite doctest
     , yaml == 0.8.*
   other-modules:
       ForumSpec
+      Schema
       Spec
   default-language: Haskell2010
 
@@ -70,7 +74,7 @@ test-suite spec
   main-is: Spec.hs
   hs-source-dirs:
       test
-  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables TupleSections TypeFamilies TypeOperators
+  default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs KindSignatures MultiParamTypeClasses OverloadedStrings RankNTypes ScopedTypeVariables TupleSections TypeFamilies TypeOperators OverloadedLabels MagicHash
   ghc-options: -Wall
   build-depends:
       base >= 4.7 && < 4.10
@@ -79,6 +83,7 @@ test-suite spec
     , text >= 1 && < 2
     , hasql-class >= 0.0.1 && < 0.0.2
     , hasql >= 0.19 && < 0.20
+    , hasql-pool >= 0.4 && < 0.5
     , template-haskell >= 2.11 && < 2.12
     , bytestring >= 0.10 && < 0.11
     , forum
@@ -87,4 +92,5 @@ test-suite spec
   other-modules:
       Doctest
       ForumSpec
+      Schema
   default-language: Haskell2010
