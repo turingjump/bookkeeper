@@ -23,6 +23,7 @@ dependencies:
   - hasql-pool >= 0.4 && < 0.5
   - template-haskell >= 2.11 && < 2.12
   - bytestring >= 0.10 && < 0.11
+  - reflection >= 2 && < 3
 
 default-extensions:
   - AutoDeriveTypeable

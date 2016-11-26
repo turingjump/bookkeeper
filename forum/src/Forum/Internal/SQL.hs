@@ -1,7 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Forum.Internal.SQL where
 
-import Data.Proxy (Proxy)
+import Data.Proxy (Proxy(Proxy))
+import Data.Char (isAlphaNum)
 import qualified Data.ByteString.Char8 as BS
 import qualified Hasql.Query as Hasql
 import qualified Hasql.Class as Hasql
@@ -13,36 +14,43 @@ import qualified Language.Haskell.TH.Quote as TH
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as LT
+import Bookkeeper.Internal.Types (Book')
 
 import Forum.Internal.Types
+import Forum.Internal.ToTable
 
 parseSQL :: String -> Either Sql.ParseErrorExtra ([Sql.Statement], [String])
-parseSQL s = (, reverse params) <$> parsed
+parseSQL s = (, params) <$> parsed
   where
+    parsed = Sql.parseStatements Sql.defaultParseFlags
+                                 "" Nothing (LT.pack . unwords $ stmt)
+    (stmt, params, _) = foldr go ([], [], 0) (words s)
     -- 'count' is used rather than 'length' for efficiency
     go ('$':word) (stmt, params, count)
-      = (('$':show count) : stmt, word : params, count + 1)
+      = (('?' : extra) : stmt , param : params, count + 1)
+         where
+           (param, extra) = span isAlphaNum word
     go word (stmt, params, count)
       = (word : stmt, params, count)
-    (stmt, params, _) = foldr go ([], [], 0) (words s)
-    parsed = Sql.parseStatements Sql.defaultParseFlags
-                                 "" Nothing (LT.pack . unwords $ reverse stmt)
 
 -- | Runs type-checking on the statement, and returns the inferred type
-{-typeCheckSQL :: Sql.Statement -> Sql.Catalog -> TH.Q TH.Type-}
-{-typeCheckSQL s cat = case Sql.typeCheckStatements Sql.defaultTypeCheckFlags cat [s] of-}
-  {-(_, [typechecked]) -> case typechecked of-}
-    {-QueryStatement annot _ | Sql.anType annot -> Just typ -> do-}
-      {-qtyp <- newName "queryType"-}
-      {-[t| forall x. (HasSqlType typ qtyp) => qtyp |]-}
+typeCheckSQL :: Sql.Statement -> Sql.Catalog -> TH.Q TH.Type
+typeCheckSQL s cat = case Sql.typeCheckStatements Sql.defaultTypeCheckFlags cat [s] of
+  (_, [typechecked]) -> case typechecked of
+    QueryStatement annot _ -> case Sql.anType annot of
+      Just typ -> do
+        qtyp <- newName "queryType"
+        [t| forall x. (HasSqlType typ qtyp) => qtyp |]
 
 makeStatement :: String -> [String] -> TH.Q TH.Exp
 makeStatement stmt' params = [e| Hasql.stmtList (BS.pack $stmt) True |]
   where
     stmt = TH.liftString stmt'
 
-sqlQQFor :: Proxy a -> TH.QuasiQuoter
-sqlQQFor _ = undefined
+sqlQQFor :: forall a f. ToCatalogUpdate a => Proxy (Book' f (a :: [*])) -> TH.QuasiQuoter
+sqlQQFor _ = case sqlQQForSchema <$> toCatalog (Proxy :: Proxy a) of
+  Left e -> error $ "Error constructing catalog: " ++ show e
+  Right v -> v
 
 sqlQQForSchema :: Sql.Catalog -> TH.QuasiQuoter
 sqlQQForSchema catalog = TH.QuasiQuoter

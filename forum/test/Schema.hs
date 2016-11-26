@@ -47,7 +47,7 @@ type Discoverer = Book
 
 type Schema = Book
   '[ "species"    :=> Species
-   , "genus"      :=> Genus
-   , "family"     :=> Family
-   , "discoverer" :=> Discoverer
+   {-, "genus"      :=> Genus-}
+   {-, "family"     :=> Family-}
+   {-, "discoverer" :=> Discoverer-}
    ]

@@ -35,6 +35,7 @@ library
     , hasql-pool >= 0.4 && < 0.5
     , template-haskell >= 2.11 && < 2.12
     , bytestring >= 0.10 && < 0.11
+    , reflection >= 2 && < 3
   exposed-modules:
       Forum
       Forum.Internal
@@ -60,10 +61,12 @@ test-suite doctest
     , hasql-pool >= 0.4 && < 0.5
     , template-haskell >= 2.11 && < 2.12
     , bytestring >= 0.10 && < 0.11
+    , reflection >= 2 && < 3
     , doctest >= 0.9 && < 0.12
     , Glob >= 0.7 && < 0.8
     , yaml == 0.8.*
   other-modules:
+      Forum.Internal.SQLSpec
       ForumSpec
       Schema
       Spec
@@ -86,11 +89,13 @@ test-suite spec
     , hasql-pool >= 0.4 && < 0.5
     , template-haskell >= 2.11 && < 2.12
     , bytestring >= 0.10 && < 0.11
+    , reflection >= 2 && < 3
     , forum
     , hspec > 2 && < 3
     , QuickCheck >= 2.8 && < 2.9
   other-modules:
       Doctest
+      Forum.Internal.SQLSpec
       ForumSpec
       Schema
   default-language: Haskell2010
