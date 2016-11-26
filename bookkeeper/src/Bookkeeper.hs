@@ -53,6 +53,7 @@ module Bookkeeper
 
   -- * Types
   , Book
+  , Book'
   , (:=>)
   , Key
 
