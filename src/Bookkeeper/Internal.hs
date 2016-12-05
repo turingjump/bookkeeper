@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-{-# OPTIONS_GHC -fno-warn-redundant-constraints -fno-warn-orphans #-}
+{-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
 module Bookkeeper.Internal where
 
 import GHC.OverloadedLabels
@@ -206,38 +206,6 @@ delete :: forall field old .
         ( Map.Submap (Map.AsMap (old Map.:\ field)) old
         ) => Key field -> Book' old -> Book (old Map.:\ field)
 delete _ (Book bk) = Book $ Map.submap bk
-
--- * Lenses
-
--- | Build a lens from a field
---
--- @
--- julian ^. rlens #age
---    = 28
--- @
--- Symbols can also be used directly as lenses, so you probably don't need to use 'rlens':
---
--- @
--- julian ^. #age
---    = 28
--- @
---
--- @
--- julian & #age .~ 29
---    = Book {age = 29, name = "Julian K. Arni"}
--- @
-rlens :: (Settable field val' old new, Gettable field old val, Functor f) =>
-          Key field -> (val -> f val') -> (Book' old -> f (Book' new))
-rlens f = lens (\r -> get f r) (\r v -> set f v r)
-  where lens sa sbt afb s = sbt s <$> afb (sa s)
-
-instance (Settable field valnew old new,
-          Gettable field old val,
-          Functor f,
-          s2ft ~ (Book' old -> f (Book' new)))
-         => IsLabel (field :: Symbol)
-                    ((val -> f valnew) -> s2ft) where
-  fromLabel _ = rlens (Key @field)
 
 -- * Generics
 
