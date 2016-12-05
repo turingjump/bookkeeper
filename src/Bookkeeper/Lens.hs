@@ -36,7 +36,6 @@ instance (Settable field valnew old new,
 
 -- $setup
 -- >>> import Data.Function ((&))
--- >>> import Data.Char (toUpper)
 -- >>> import Lens.Micro
 -- >>> type Person = Book '[ "name" :=> String , "age" :=> Int ]
 -- >>> let julian :: Person = emptyBook & #age =: 28 & #name =: "Julian K. Arni"
