@@ -46,6 +46,9 @@ module Bookkeeper
   , split
   , getIf
 
+  -- ** Split
+  , getSubset
+  , Subset
 
   -- ** Option
   , Optionable
@@ -57,14 +60,32 @@ module Bookkeeper
   , (:=>)
   , Key
 
+  -- * Operations
+  , bmap
+  , bmapConstraint
+  , bcollapse
+  , bcollapseWithKeys
+  , BKeys(bkeys)
+  , bsequence
+  , bproxies
+  , All
+  , All2
+  , And
+  , IsEqTo
+
   -- * From Haskell record
   , fromRecord
 
   -- * Re-exports
   , (&)
+  , Const(..)
+  , Identity(..)
 
   ) where
 
 import Bookkeeper.Internal
 import Bookkeeper.Internal.Types
+import Bookkeeper.Internal.Operations
 import Data.Function
+import Data.Functor.Const
+import Data.Functor.Identity

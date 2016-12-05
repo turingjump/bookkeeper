@@ -1,22 +1,27 @@
+{-# LANGUAGE AllowAmbiguousTypes        #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE TypeFamilyDependencies #-}
+{-# LANGUAGE PatternSynonyms            #-}
+{-# LANGUAGE TypeFamilyDependencies     #-}
+{-# LANGUAGE UndecidableInstances       #-}
+{-# LANGUAGE UndecidableSuperClasses    #-}
 
 module Bookkeeper.Internal.Types where
 
 import Control.Monad.Identity
-import Data.Bifunctor (first)
-import Data.Default.Class (Default(..))
-import Data.Kind (Type)
-import Data.Monoid ((<>))
-import Data.List (intercalate)
+import Data.Bifunctor         (first)
+import Data.Default.Class     (Default (..))
+import Data.Functor.Const
+import Data.Functor.Identity
+import Data.Kind              (Type)
+import Data.List              (intercalate)
+import Data.Monoid            ((<>))
 import Data.Proxy
-import Data.Type.Equality (type (==))
+import Data.Type.Equality     (type (==))
+import GHC.Exts               (Constraint)
 import GHC.Generics
 import GHC.OverloadedLabels
-import GHC.TypeLits (Symbol, TypeError, ErrorMessage(Text), CmpSymbol, KnownSymbol, symbolVal)
+import GHC.TypeLits           (CmpSymbol, ErrorMessage (Text), KnownSymbol,
+                               Symbol, TypeError, symbolVal)
 
 ------------------------------------------------------------------------------
 -- :=>
@@ -52,18 +57,15 @@ data Book' :: (k -> Type) -> [Type] -> Type where
 
 -- ** Eq
 
-instance Eq (Book' f '[]) where
-  _ == _ = True
-
-instance (Eq (f val), Eq (Book' f xs)) => Eq (Book' f ((field :=> val) ': xs)) where
-  BCons value1 rest1 == BCons value2 rest2
-    = value1 == value2 && rest1 == rest2
+deriving instance All (Eq `Compose` f) as => Eq (Book' f as)
 
 -- ** Monoid
 
-instance Monoid (Book' Identity '[]) where
-  mempty = emptyBook
-  _ `mappend` _ = emptyBook
+instance All (Monoid `Compose` f) as => Monoid (Book' f as) where
+  mempty = bmapConstraint (Proxy :: Proxy (Monoid `Compose` f)) go bproxies
+    where
+      go :: forall f a. Monoid (f a) => Proxy a -> f a
+      go _ = mempty
 
 -- ** Default
 
@@ -82,25 +84,25 @@ emptyBook = BNil
 
 -- ** Show
 
-instance ShowHelper (Book' Identity a) => Show (Book' Identity a) where
-  show x = "Book {" <> intercalate ", " (go <$> showHelper x) <> "}"
-    where
-      go (k, v) = k <> " = " <> v
+{-instance ShowHelper (Book' Identity a) => Show (Book' Identity a) where-}
+  {-show x = "Book {" <> intercalate ", " (go <$> showHelper x) <> "}"-}
+    {-where-}
+      {-go (k, v) = k <> " = " <> v-}
 
-class ShowHelper a where
-  showHelper :: a -> [(String, String)]
+{-class ShowHelper a where-}
+  {-showHelper :: a -> [(String, String)]-}
 
-instance ShowHelper (Book' Identity '[]) where
-  showHelper _ = []
+{-instance ShowHelper (Book' Identity '[]) where-}
+  {-showHelper _ = []-}
 
-instance ( ShowHelper (Book' Identity xs)
-         , Show v
-         , KnownSymbol k
-         ) => ShowHelper (Book' Identity ((k :=> v) ': xs)) where
-  showHelper (BCons v rest) = (show k, show v):showHelper rest
-    where
-      k :: Key k
-      k = Key
+{-instance ( ShowHelper (Book' Identity xs)-}
+         {-, Show v-}
+         {-, KnownSymbol k-}
+         {-) => ShowHelper (Book' Identity ((k :=> v) ': xs)) where-}
+  {-showHelper (BCons v rest) = (show k, show v):showHelper rest-}
+    {-where-}
+      {-k :: Key k-}
+      {-k = Key-}
 
 -- ** MFunctor
 
@@ -112,6 +114,8 @@ instance MFunctor Book' where
 -}
 -- ** Generics
 
+{-instance Generic (Book' f '[ field :=> val ]) where-}
+  {-type Rep (Book' f '[ field :=> val ]) = S1 -}
 class FromGeneric a book | a -> book where
   fromGeneric :: a x -> Book' Identity book
 
@@ -353,3 +357,68 @@ type family Union leftBook rightBook where
 
 class Unionable leftBook rightBook where
   union :: Book' f leftBook -> Book' f rightBook -> Book' f (Union leftBook rightBook)
+
+------------------------------------------------------------------------------
+-- Constraints
+------------------------------------------------------------------------------
+
+type family All (ctx :: k -> Constraint) (v :: [k]) :: Constraint where
+  All ctx '[] = ()
+  All ctx (key :=> value ': rest) = (ctx value, All ctx rest)
+
+class All2 ctx a
+instance All2 ctx '[]
+instance (All ctx field, All2 ctx rest) => All2 ctx (key :=> field ': rest)
+
+class (c1 x, c2 x) => And c1 c2 x
+
+class (a ~ b) => IsEqTo a b
+instance (a ~ b) => IsEqTo a b
+
+class (f (g x)) => (f `Compose` g) x
+instance (f (g x)) => (f `Compose` g) x
+infixr 9 `Compose`
+
+------------------------------------------------------------------------------
+-- Operations
+------------------------------------------------------------------------------
+
+-- | Maps a natural transformation over every record.
+bmap :: (forall x. f x -> g x) -> Book' f entries -> Book' g entries
+bmap _ BNil = BNil
+bmap nat (BCons value rest) = BCons (nat value) (bmap nat rest)
+
+-- | Map a class method over every record.
+bmapConstraint :: All c entries => Proxy c -> (forall x . c x => f x -> g x) -> Book' f entries -> Book' g entries
+bmapConstraint _ _   BNil = BNil
+bmapConstraint p nat (BCons value rest) = BCons (nat value) (bmapConstraint p nat rest)
+
+-- | Collapse a map into a list.
+bcollapse :: Book' (Const a) entries -> [a]
+bcollapse BNil = []
+bcollapse (BCons (Const h) rest) = h : bcollapse rest
+
+-- | Collapse a map, including the keys.
+bcollapseWithKeys :: forall a entries. BKeys entries => Book' (Const a) entries -> [(String, a)]
+bcollapseWithKeys b = zip (bkeys (Proxy :: Proxy entries)) (bcollapse b)
+
+class BKeys entries where
+  bkeys :: Proxy entries -> [String]
+
+instance BKeys '[] where
+  bkeys _ = []
+
+instance (KnownSymbol key, BKeys rest) => BKeys (key :=> val ': rest) where
+  bkeys _ = symbolVal (Proxy :: Proxy key) : bkeys (Proxy :: Proxy rest)
+
+-- | Analogous to 'Data.Traversable.sequence'.
+bsequence :: Monad m => Book' m entries -> m (Book' Identity entries)
+bsequence BNil = return BNil
+bsequence (BCons mvalue mrest) = do
+  value <- mvalue
+  rest <- bsequence mrest
+  return $ BCons (return value) rest
+
+-- Make a book filled with @Proxy@s.
+bproxies :: Book' Proxy entries
+bproxies = bmap (const Proxy) undefined
