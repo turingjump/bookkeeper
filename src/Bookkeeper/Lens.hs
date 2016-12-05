@@ -10,17 +10,21 @@ import GHC.TypeLits (Symbol, KnownSymbol, TypeError, ErrorMessage(..))
 
 -- | Build a lens from a field
 --
--- >>> julian ^. rlens #age
--- 28
--- 
+-- @
+-- julian ^. rlens #age
+--    = 28
+-- @
 -- Symbols can also be used directly as lenses, so you probably don't need to use 'rlens':
 --
--- >>> julian ^. #age
--- 28
+-- @
+-- julian ^. #age
+--    = 28
+-- @
 --
--- >>> julian & #age .~ 29
--- Book {age = 29, name = "Julian K. Arni"}
---
+-- @
+-- julian & #age .~ 29
+--    = Book {age = 29, name = "Julian K. Arni"}
+-- @
 rlens :: (Settable field val' old new, Gettable field old val, Functor f) =>
           Key field -> (val -> f val') -> (Book' old -> f (Book' new))
 rlens f = lens (\r -> get f r) (\r v -> set f v r)
@@ -34,8 +38,3 @@ instance (Settable field valnew old new,
                     ((val -> f valnew) -> s2ft) where
   fromLabel _ = rlens (Key @field)
 
--- $setup
--- >>> import Data.Function ((&))
--- >>> import Lens.Micro
--- >>> type Person = Book '[ "name" :=> String , "age" :=> Int ]
--- >>> let julian :: Person = emptyBook & #age =: 28 & #name =: "Julian K. Arni"
