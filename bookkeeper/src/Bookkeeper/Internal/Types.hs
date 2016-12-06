@@ -11,10 +11,9 @@ import Control.Monad.Identity
 import Data.Bifunctor         (first)
 import Data.Default.Class     (Default (..))
 import Data.Functor.Const
-import Data.Functor.Identity
-import Data.Kind              (Type)
-import Data.List              (intercalate)
 import Data.Monoid            ((<>))
+import Data.List              (intercalate)
+import Data.Kind              (Type)
 import Data.Proxy
 import Data.Type.Equality     (type (==))
 import GHC.Exts               (Constraint)
@@ -61,11 +60,13 @@ deriving instance All (Eq `Compose` f) as => Eq (Book' f as)
 
 -- ** Monoid
 
-instance All (Monoid `Compose` f) as => Monoid (Book' f as) where
-  mempty = bmapConstraint (Proxy :: Proxy (Monoid `Compose` f)) go bproxies
-    where
-      go :: forall f a. Monoid (f a) => Proxy a -> f a
-      go _ = mempty
+instance Monoid (Book' f '[]) where
+  mempty = BNil
+  _ `mappend` _ = BNil
+
+instance (Monoid (f a), Monoid (Book' f as)) => Monoid (Book' f (key :=> a ': as)) where
+  mempty = BCons mempty mempty
+  BCons a as `mappend` BCons b bs = BCons (a <> b) (as <> bs)
 
 -- ** Default
 
@@ -84,25 +85,25 @@ emptyBook = BNil
 
 -- ** Show
 
-{-instance ShowHelper (Book' Identity a) => Show (Book' Identity a) where-}
-  {-show x = "Book {" <> intercalate ", " (go <$> showHelper x) <> "}"-}
-    {-where-}
-      {-go (k, v) = k <> " = " <> v-}
+instance ShowHelper (Book' Identity a) => Show (Book' Identity a) where
+  show x = "Book {" <> intercalate ", " (go <$> showHelper x) <> "}"
+    where
+      go (k, v) = k <> " = " <> v
 
-{-class ShowHelper a where-}
-  {-showHelper :: a -> [(String, String)]-}
+class ShowHelper a where
+  showHelper :: a -> [(String, String)]
 
-{-instance ShowHelper (Book' Identity '[]) where-}
-  {-showHelper _ = []-}
+instance ShowHelper (Book' Identity '[]) where
+  showHelper _ = []
 
-{-instance ( ShowHelper (Book' Identity xs)-}
-         {-, Show v-}
-         {-, KnownSymbol k-}
-         {-) => ShowHelper (Book' Identity ((k :=> v) ': xs)) where-}
-  {-showHelper (BCons v rest) = (show k, show v):showHelper rest-}
-    {-where-}
-      {-k :: Key k-}
-      {-k = Key-}
+instance ( ShowHelper (Book' Identity xs)
+         , Show v
+         , KnownSymbol k
+         ) => ShowHelper (Book' Identity ((k :=> v) ': xs)) where
+  showHelper (BCons v rest) = (show k, show v):showHelper rest
+    where
+      k :: Key k
+      k = Key
 
 -- ** MFunctor
 
@@ -422,3 +423,14 @@ bsequence (BCons mvalue mrest) = do
 -- Make a book filled with @Proxy@s.
 bproxies :: Book' Proxy entries
 bproxies = bmap (const Proxy) undefined
+
+class BZipWith fn f g h xs ys zs where
+  bzipWith :: fn -> Book' f xs -> Book' g ys -> Book' h zs
+
+instance BZipWith fn f g h '[] '[] '[] where
+  bzipWith _ BNil BNil = BNil
+
+instance (BZipWith (f a -> g b -> h c) f g h rest1 rest2 rest3) =>
+        BZipWith (f a -> g b -> h c) f g h
+  (field :=> a ': rest1) (field :=> b ': rest2) (field :=> c ': rest3) where
+  bzipWith f (BCons x r1) (BCons y r2) = BCons (f x y) (bzipWith f r1 r2)

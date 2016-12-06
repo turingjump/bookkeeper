@@ -85,7 +85,6 @@ module Bookkeeper
 
 import Bookkeeper.Internal
 import Bookkeeper.Internal.Types
-import Bookkeeper.Internal.Operations
 import Data.Function
 import Data.Functor.Const
 import Data.Functor.Identity
