@@ -359,6 +359,14 @@ type family Union leftBook rightBook where
 class Unionable leftBook rightBook where
   union :: Book' f leftBook -> Book' f rightBook -> Book' f (Union leftBook rightBook)
 
+instance Unionable leftBook '[] where
+  union leftBook _ = leftBook
+
+instance ( Insertable key value leftBook
+         , Unionable (Insert key value leftBook) rest
+         ) => Unionable leftBook (key :=> value ': rest) where
+  union leftBook (BCons x xs) = union (insert (Key :: Key key) x leftBook) xs
+
 ------------------------------------------------------------------------------
 -- Sorted
 ------------------------------------------------------------------------------

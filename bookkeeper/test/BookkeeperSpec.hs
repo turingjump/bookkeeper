@@ -4,6 +4,7 @@ import Data.Char (toUpper)
 import Data.Either (isLeft)
 import Test.Hspec
 import Test.QuickCheck
+import GHC.Generics (Generic)
 
 import Bookkeeper
 
@@ -64,8 +65,22 @@ bookSpec = describe "books" $ do
     it "obeys the 'put . put' law" $ property $ \(x :: Int) (y :: Int) -> do
       set #label y (set #label x emptyBook) `shouldBe` set #label y emptyBook
 
+    context "fromRecord" $ do
+
+      it "converts similarly-shaped types to books" $ do
+        let pr :: PersonR
+            pr = PersonR "a" 1
+            p  :: Person
+            p  = fromRecord pr
+
+        get #name p `shouldBe` "a"
+        get #age p `shouldBe` 1
+
+
 type Person = Book '[ "name" :=> String , "age" :=> Int]
 
+data PersonR = PersonR { name :: String, age :: Int }
+  deriving (Eq, Show, Read, Generic)
 
 ledgerSpec :: Spec
 ledgerSpec = describe "ledger" $ do
