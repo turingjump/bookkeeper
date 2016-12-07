@@ -11,9 +11,9 @@ import Bookkeeper.Internal.Types
 
 -- Using a type synonym allows the user to write the fields in any order, and
 -- yet have the underlying value always have sorted fields.
-type Book xs = Book' Identity (Sort xs '[])
+type Book xs = Book' Identity (Sort xs)
 
-type Ledger ledger = Ledger' Identity (Sort ledger '[])
+type Ledger ledger = Ledger' Identity (Sort ledger)
 
 ------------------------------------------------------------------------------
 -- Setters and getters

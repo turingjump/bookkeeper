@@ -115,8 +115,6 @@ instance MFunctor Book' where
 -}
 -- ** Generics
 
-{-instance Generic (Book' f '[ field :=> val ]) where-}
-  {-type Rep (Book' f '[ field :=> val ]) = S1 -}
 class FromGeneric a book | a -> book where
   fromGeneric :: a x -> Book' Identity book
 
@@ -206,10 +204,12 @@ instance (Ord (f value), Ord (Ledger' f rest))
 -- Internal stuff
 ------------------------------------------------------------------------------
 
+type Sort xs = Sort' xs '[]
+
 -- Insertion sort for simplicity.
-type family Sort unsorted sorted where
-   Sort '[] sorted = sorted
-   Sort (key :=> value ': xs) sorted = Sort xs (Insert key value sorted)
+type family Sort' unsorted sorted where
+   Sort' '[] sorted = sorted
+   Sort' (key :=> value ': xs) sorted = Sort' xs (Insert key value sorted)
 
 type family Insert key value oldMap where
   Insert key value '[] = '[ key :=> value ]
@@ -358,6 +358,24 @@ type family Union leftBook rightBook where
 
 class Unionable leftBook rightBook where
   union :: Book' f leftBook -> Book' f rightBook -> Book' f (Union leftBook rightBook)
+
+------------------------------------------------------------------------------
+-- Sorted
+------------------------------------------------------------------------------
+
+class Sorted xs where
+  sorted :: Book' f xs -> Book' f (Sort xs)
+
+instance Sorted '[] where
+  sorted _ = BNil
+
+instance (Sort (field :=> x ': xs) ~ Insert field x (Sort xs), Sorted xs
+        , Insertable field x (Sort xs)
+        , head ~ (field :=> x)
+        )
+    => Sorted (head ': xs) where
+  sorted (BCons x xs) = insert (Key :: Key field) x (sorted xs)
+
 
 ------------------------------------------------------------------------------
 -- Constraints

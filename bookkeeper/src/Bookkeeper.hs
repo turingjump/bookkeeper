@@ -34,6 +34,10 @@ module Bookkeeper
   , Unionable
   , union
 
+  -- * Sorting
+  , Sorted
+  , sorted
+
   -- * Deleting
   , delete
   , Delete
