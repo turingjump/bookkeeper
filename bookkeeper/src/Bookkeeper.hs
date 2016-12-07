@@ -62,7 +62,7 @@ module Bookkeeper
   , Book
   , Book'
   , (:=>)
-  , Key
+  , Key(Key)
 
   -- * Operations
   , bmap
@@ -76,6 +76,7 @@ module Bookkeeper
   , All2
   , And
   , IsEqTo
+  , Compose
 
   -- * From Haskell record
   , fromRecord

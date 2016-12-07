@@ -50,6 +50,7 @@ executable compileTime
     , mtl == 2.2.*
     , data-default-class
     , base >=4.9 && < 4.10 , bookkeeper
+  buildable: False
   default-language: Haskell2010
 
 executable readme
@@ -62,6 +63,7 @@ executable readme
     , mtl == 2.2.*
     , data-default-class
     , base >=4.9 && < 4.10 , bookkeeper , markdown-unlit
+  buildable: False
   default-language: Haskell2010
 
 test-suite doctest

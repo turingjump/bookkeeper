@@ -185,11 +185,11 @@ instance
       key = Key
   show (There x) = show x
 
-instance Ord (f value) => Ord (Ledger' f '[ key :=> value]) where
+instance {-# OVERLAPPING #-} Ord (f value) => Ord (Ledger' f '[ key :=> value]) where
   Here x <= Here y = x <= y
   _ <= _ = error "impossible"
 
-instance (Ord (f value), Ord (Ledger' f rest))
+instance {-# OVERLAPPABLE #-} (Ord (f value), Ord (Ledger' f rest))
   => Ord (Ledger' f (key :=> value ': rest)) where
   Here x <= Here y = x <= y
   Here _ <= There _ = True
