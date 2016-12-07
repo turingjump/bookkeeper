@@ -207,7 +207,6 @@ delete :: forall field old .
         ) => Key field -> Book' old -> Book (old Map.:\ field)
 delete _ (Book bk) = Book $ Map.submap bk
 
-
 -- * Generics
 
 class FromGeneric a book | a -> book where
