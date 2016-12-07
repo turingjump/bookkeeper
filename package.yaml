@@ -1,5 +1,5 @@
 name:                bookkeeper
-version:             0.2.3
+version:             0.2.4
 synopsis:            Anonymous records and overloaded labels
 description:         Please see README.md
 homepage:            http://github.com/turingjump/bookkeeper#readme

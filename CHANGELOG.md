@@ -1,3 +1,7 @@
+# 0.2.4
+
+* Added 'rlens' and lens 'IsLabel' instance.
+
 # 0.2.3
 
 * Implement 'fromRecord' for converting values from record.
