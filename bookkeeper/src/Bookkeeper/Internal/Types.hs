@@ -9,6 +9,8 @@ module Bookkeeper.Internal.Types where
 
 import Control.Monad.Identity
 import Data.Bifunctor         (first)
+import Data.Constraint        ((:-))
+import Data.Constraint.Unsafe (unsafeCoerceConstraint)
 import Data.Default.Class     (Default (..))
 import Data.Functor.Const
 import Data.Monoid            ((<>))
@@ -16,7 +18,7 @@ import Data.List              (intercalate)
 import Data.Kind              (Type)
 import Data.Proxy
 import Data.Type.Equality     (type (==))
-import GHC.Exts               (Constraint)
+import GHC.Exts               (Constraint, inline)
 import GHC.Generics
 import GHC.OverloadedLabels
 import GHC.TypeLits           (CmpSymbol, ErrorMessage (Text), KnownSymbol,
@@ -236,7 +238,7 @@ instance Subset '[] '[] where
 instance {-# OVERLAPPING #-} (Subset tail1 tail2, value ~ value')
   => Subset (key :=> value ': tail1) (key :=> value' ': tail2) where
   getSubset (BCons value oldBook) = BCons value $ getSubset oldBook
-  {-# INLINE getSubset #-}
+  {-# INLINABLE getSubset #-}
 instance {-# OVERLAPPABLE #-} (Subset tail subset) => Subset (head ': tail) subset where
   getSubset (BCons _value oldBook) = getSubset oldBook
   {-# INLINE getSubset #-}
@@ -290,6 +292,8 @@ instance (newMap ~ Insert key value restOfMap, Insertable key value restOfMap) =
   insert' _ key value (BCons oldValue oldBook) = BCons oldValue (insert key value oldBook)
   {-# INLINE insert' #-}
 
+doubleInsert :: Proxy key -> Proxy newValue -> Proxy otherValue -> Proxy book -> Insertable key newValue (Insert key otherValue book) :- Insertable key newValue book
+doubleInsert _ _ _ _  = unsafeCoerceConstraint
 ------------------------------------------------------------------------------
 -- Option
 ------------------------------------------------------------------------------
@@ -460,3 +464,4 @@ instance (BZipWith (f a -> g b -> h c) f g h rest1 rest2 rest3) =>
         BZipWith (f a -> g b -> h c) f g h
   (field :=> a ': rest1) (field :=> b ': rest2) (field :=> c ': rest3) where
   bzipWith f (BCons x r1) (BCons y r2) = BCons (f x y) (bzipWith f r1 r2)
+

@@ -21,6 +21,7 @@ dependencies:
   - base >= 4.9 && < 4.10
   - mtl == 2.2.*
   - data-default-class
+  - constraints == 0.8.*
 
 
 library:

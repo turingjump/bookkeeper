@@ -23,6 +23,7 @@ module Bookkeeper
   -- * Setters
   , Settable
   , set
+  , set'
   , (=:)
 
   -- * Modifying
@@ -86,6 +87,7 @@ module Bookkeeper
   , Const(..)
   , Identity(..)
 
+  , fusedModify
   ) where
 
 import Bookkeeper.Internal

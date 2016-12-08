@@ -1,13 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
-{-# OPTIONS_GHC -ddump-simpl #-}
 module Bookkeeper.Internal where
 
 import Control.Monad.Identity
 import GHC.Generics
 import Bookkeeper.Internal.Types
 
+import Data.Proxy
+import Data.Constraint ((\\))
+import Unsafe.Coerce
 
 -- Using a type synonym allows the user to write the fields in any order, and
 -- yet have the underlying value always have sorted fields.
@@ -65,8 +67,12 @@ type Settable field value oldBook = Insertable field value oldBook
 -- >>> set #likesDoctest True julian
 -- Book {age = 28, likesDoctest = True, name = "Julian K. Arni"}
 set :: ( Insertable key value old ) => Key key -> value -> Book' Identity old -> Book' Identity (Insert key value old)
-set key value = insert key (Identity value)
+set key value = set' key (Identity value)
 {-# INLINE set #-}
+
+set' :: ( Insertable key value old ) => Key key -> f value -> Book' f old -> Book' f (Insert key value old)
+set' key value = insert key value
+
 
 -- | Infix version of 'set'
 --
@@ -105,7 +111,7 @@ modify :: (Modifiable key originalValue newValue originalBook)
   -> Book' Identity (Insert key newValue originalBook)
 modify p f b = set p v b
   where v = f $ get p b
-{-# INLINE modify #-}
+{-# NOINLINE [0] modify #-}
 
 -- | Infix version of 'modify'.
 --
@@ -117,6 +123,24 @@ modify p f b = set p v b
 (%:) = modify
 infixr 3 %:
 {-# INLINE (%:) #-}
+
+fusedModify ::  forall key midValue midValue1 originalBook originalValue newValue .
+  ( Modifiable key originalValue midValue originalBook
+  , midValue ~ midValue1
+  , Modifiable key midValue newValue (Insert key midValue originalBook)
+  )
+  => Key key
+  -> (midValue1 -> newValue)
+  -> (originalValue -> midValue)
+  -> Book' Identity originalBook
+  -> Book' Identity (Insert key newValue (Insert key midValue originalBook))
+fusedModify key f g =
+  ((unsafeCoerce . modify key (f . g)) \\ doubleInsert p1 p2 p3 p4)
+  where
+    p1 = Proxy :: Proxy key
+    p2 = Proxy :: Proxy newValue
+    p3 = Proxy :: Proxy midValue
+    p4 = Proxy :: Proxy originalBook
 
 
 type Deletable key oldBook = Subset oldBook (Delete key oldBook)
@@ -160,8 +184,16 @@ delete _ bk = getSubset bk
 fromRecord :: (Generic a, FromGeneric (Rep a) bookRep) => a -> Book' Identity bookRep
 fromRecord = fromGeneric . from
 
+
 -- $setup
 -- >>> import Data.Function ((&))
 -- >>> import Data.Char (toUpper)
 -- >>> type Person = Book '[ "name" :=> String , "age" :=> Int ]
 -- >>> let julian :: Person = emptyBook & #age =: 28 & #name =: "Julian K. Arni"
+
+------------------------------------------------------------------------------
+-- RULES
+
+{-# RULES
+"modify/fusedModify" forall f g key book. modify key f (modify key g book) = fusedModify key f g book
+  #-}

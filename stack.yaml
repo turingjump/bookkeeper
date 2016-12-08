@@ -4,6 +4,7 @@ flags:
 packages:
 - ./bookkeeper
 - ./bookkeeper-aeson
+- ./bookkeeper-quickcheck
 setup-info:
   ghc:
     windows64:
@@ -21,6 +22,7 @@ setup-info:
         sha1: 53ed03d986a49ea680c291540ce44ce469514d7c
         content-length: 113379688
 extra-deps:
+- constraints-0.8
 - Glob-0.7.13
 - HUnit-1.5.0.0
 - QuickCheck-2.8.2
