@@ -55,7 +55,7 @@ tests:
     dependencies:
       - bookkeeper-aeson
       - hspec > 2 && < 3
-      - QuickCheck >= 2.8 && < 2.9
+      - QuickCheck >= 2.8 && < 2.10
   doctest:
     main:            Doctest.hs
     source-dirs:     test

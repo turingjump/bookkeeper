@@ -34,8 +34,6 @@ type Gettable field book val = (Subset book '[ field :=> val ])
 -- >>> get #moneyFrom julian
 -- ...
 -- ...  • The provided Book does not contain the field "moneyFrom"
--- ...    Book type:
--- ...    '["age" ':-> Int, "name" ':-> String]
 -- ...  • In the expression: get #moneyFrom julian
 -- ...
 get :: forall field book val. (Gettable field book val)
@@ -63,7 +61,7 @@ type Settable field value oldBook = Insertable field value oldBook
 -- | Sets or updates a field to a value.
 --
 -- >>> set #likesDoctest True julian
--- Book {age = 28, likesDoctest = True, name = "Julian K. Arni"}
+-- Book {#age = Identity 28, #likesDoctest = Identity True, #name = Identity "Julian K. Arni"}
 set :: ( Insertable key value old ) => Key key -> value -> Book' Identity old -> Book' Identity (Insert key value old)
 set key value = insert key (Identity value)
 {-# INLINE set #-}
@@ -71,7 +69,7 @@ set key value = insert key (Identity value)
 -- | Infix version of 'set'
 --
 -- >>> julian & #age =: 29
--- Book {age = 29, name = "Julian K. Arni"}
+-- Book {#age = Identity 29, #name = Identity "Julian K. Arni"}
 (=:) :: ( Insertable key value old ) => Key key -> value -> Book' Identity old -> Book' Identity (Insert key value old)
 (=:) = set
 infix 3 =:
@@ -90,14 +88,12 @@ type Modifiable field originalValue newValue originalBook =
 -- | Apply a function to a field.
 --
 -- >>> julian & modify #name (fmap toUpper)
--- Book {age = 28, name = "JULIAN K. ARNI"}
+-- Book {#age = Identity 28, #name = Identity "JULIAN K. ARNI"}
 --
 -- If the key does not exist, throws a type error
 -- >>> modify #height (\_ -> 132) julian
 -- ...
 -- ...  • The provided Book does not contain the field "height"
--- ...    Book type:
--- ...    '["age" ':-> Int, "name" ':-> String]
 -- ...  • In the expression: modify #height (\ _ -> 132) julian
 -- ...
 modify :: (Modifiable key originalValue newValue originalBook)
@@ -110,7 +106,7 @@ modify p f b = set p v b
 -- | Infix version of 'modify'.
 --
 -- >>> julian & #name %: fmap toUpper
--- Book {age = 28, name = "JULIAN K. ARNI"}
+-- Book {#age = Identity 28, #name = Identity "JULIAN K. ARNI"}
 (%:) :: (Modifiable key originalValue newValue originalBook)
   =>  Key key -> (originalValue -> newValue) -> Book' Identity originalBook
   -> Book' Identity (Insert key newValue originalBook)
@@ -126,8 +122,6 @@ type Deletable key oldBook = Subset oldBook (Delete key oldBook)
 -- >>> get #name $ delete #name julian
 -- ...
 -- ...  • The provided Book does not contain the field "name"
--- ...    Book type:
--- ...    '["age" ':-> Int]
 -- ...  • In the expression: get #name
 -- ...
 delete :: forall key oldBook f .
@@ -141,7 +135,7 @@ delete _ bk = getSubset bk
 --
 -- >>> data Test = Test {  field1 :: String, field2 :: Int, field3 :: Char } deriving Generic
 -- >>> fromRecord (Test "hello" 0 'c')
--- Book {field1 = "hello", field2 = 0, field3 = 'c'}
+-- Book {#field1 = Identity "hello", #field2 = Identity 0, #field3 = Identity 'c'}
 --
 -- Trying to convert a datatype which is not a record will result in a type
 -- error:

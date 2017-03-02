@@ -19,8 +19,9 @@ import Data.Type.Equality     (type (==))
 import GHC.Exts               (Constraint)
 import GHC.Generics
 import GHC.OverloadedLabels
-import GHC.TypeLits           (CmpSymbol, ErrorMessage (Text), KnownSymbol,
-                               Symbol, TypeError, symbolVal)
+import GHC.TypeLits           (CmpSymbol, ErrorMessage (Text, (:<>:),
+                               ShowType), KnownSymbol, Symbol, TypeError,
+                               symbolVal)
 
 ------------------------------------------------------------------------------
 -- :=>
@@ -240,6 +241,9 @@ instance {-# OVERLAPPING #-} (Subset tail1 tail2, value ~ value')
 instance {-# OVERLAPPABLE #-} (Subset tail subset) => Subset (head ': tail) subset where
   getSubset (BCons _value oldBook) = getSubset oldBook
   {-# INLINE getSubset #-}
+instance TypeError (Text "The provided Book does not contain the field " :<>: ShowType key)
+  => Subset '[] (key :=> val ': xs) where
+  getSubset = error "unreachable"
 
 
 ------------------------------------------------------------------------------
