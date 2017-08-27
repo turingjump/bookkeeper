@@ -1,5 +1,5 @@
 name:                bookkeeper
-version:             0.2.4
+version:             0.2.5
 synopsis:            Anonymous records and overloaded labels
 description:         Please see README.md
 homepage:            http://github.com/turingjump/bookkeeper#readme
@@ -9,7 +9,7 @@ author:              Julian K. Arni
 maintainer:          jkarni@gmail.com
 copyright:           (c) Julian K. Arni
 github:              turingjump/bookkeeper
-tested-with:         GHC == 8.0.1
+tested-with:         GHC == 8.2.1
 category:            Data Structures, Records
 extra-source-files:
   - CHANGELOG.md
@@ -19,7 +19,7 @@ extra-source-files:
 ghc-options: -Wall
 
 dependencies:
-  - base >= 4.9 && < 4.10
+  - base >= 4.9 && < 4.11
   - type-level-sets
   - data-default-class
 
@@ -60,14 +60,14 @@ tests:
     dependencies:
       - bookkeeper
       - hspec > 2 && < 3
-      - QuickCheck >= 2.8 && < 2.9
+      - QuickCheck >= 2.8 && < 2.11
   doctest:
     main:            Doctest.hs
-    source-dirs:     test
+    source-dirs:     doctest
     default-extensions: *allExts
     dependencies:
       - doctest >= 0.9 && < 0.12
-      - Glob >= 0.7 && < 0.8
+      - Glob >= 0.7 && < 0.9
       - yaml == 0.8.*
 
 benchmarks:
@@ -88,6 +88,6 @@ executables:
     source-dirs:         exec
     default-extensions:  []
     other-modules:       []
-    dependencies:        base >=4.9 && < 4.10
+    dependencies:        base >=4.9 && < 4.11
                        , bookkeeper
                        , markdown-unlit
