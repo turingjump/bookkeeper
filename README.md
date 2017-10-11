@@ -1,4 +1,4 @@
-# Bookkeeper
+# Bookkeeper [![Build Status][ci-img]][ci]
 
 Bookkeeper is a new Haskell library that uses the new OverloadedLabels feature
 of GHC 8 to provide a new take on datatypes and records:
@@ -52,3 +52,6 @@ You can set, modify, or get fields. See the haddocks for more information.
 main :: IO ()
 main = return ()
 ~~~
+
+[ci-img]:   https://travis-ci.org/turingjump/bookkeeper.svg
+[ci]:       https://travis-ci.org/turingjump/bookkeeper
