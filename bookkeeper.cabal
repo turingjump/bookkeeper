@@ -5,7 +5,7 @@
 name:           bookkeeper
 version:        0.2.5
 synopsis:       Anonymous records and overloaded labels
-description:    Please see README.md
+description:    Please see README.md for more information and examples.
 category:       Data Structures, Records
 homepage:       http://github.com/turingjump/bookkeeper#readme
 bug-reports:    https://github.com/turingjump/bookkeeper/issues
@@ -14,7 +14,7 @@ maintainer:     jkarni@gmail.com
 copyright:      (c) Julian K. Arni
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.2.1
+tested-with:    GHC == 8.0.1, GHC == 8.2.1
 build-type:     Simple
 cabal-version:  >= 1.10
 
@@ -95,7 +95,7 @@ benchmark bench
   hs-source-dirs:
       bench
   default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFunctor DeriveGeneric DeriveFoldable DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs MultiParamTypeClasses KindSignatures TypeInType OverloadedStrings RankNTypes ScopedTypeVariables TypeApplications TypeFamilies TypeOperators OverloadedLabels MagicHash
-  ghc-options: -Wall -O2
+  ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 4.11
     , type-level-sets

@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE CPP #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Bookkeeper.Lens where
 
@@ -36,5 +37,9 @@ instance (Settable field valnew old new,
           s2ft ~ (Book' old -> f (Book' new)))
          => IsLabel (field :: Symbol)
                     ((val -> f valnew) -> s2ft) where
-  fromLabel = rlens (Key @field)
+#if MIN_VERSION_base(4,10,0)
+    fromLabel = rlens (Key @field)
+#else
+    fromLabel _ = rlens (Key @field)
+#endif
 
