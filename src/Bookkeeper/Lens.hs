@@ -4,7 +4,7 @@ module Bookkeeper.Lens where
 
 import GHC.OverloadedLabels
 import Bookkeeper.Internal
-import GHC.TypeLits (Symbol, KnownSymbol, TypeError, ErrorMessage(..))
+import GHC.TypeLits (Symbol)
 
 -- * Lenses
 
@@ -36,5 +36,5 @@ instance (Settable field valnew old new,
           s2ft ~ (Book' old -> f (Book' new)))
          => IsLabel (field :: Symbol)
                     ((val -> f valnew) -> s2ft) where
-  fromLabel _ = rlens (Key @field)
+  fromLabel = rlens (Key @field)
 

@@ -1,6 +1,6 @@
-resolver: nightly-2016-05-27
+resolver: nightly-2017-08-24
 packages:
 - '.'
 extra-deps:
-- 'type-level-sets-0.7'
+- 'type-level-sets-0.8.0.0'
 flags: {}
