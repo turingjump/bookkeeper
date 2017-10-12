@@ -53,5 +53,5 @@ main :: IO ()
 main = return ()
 ~~~
 
-[ci-img]:   https://travis-ci.org/turingjump/bookkeeper.svg
+[ci-img]:   https://travis-ci.org/turingjump/bookkeeper.svg?branch=master
 [ci]:       https://travis-ci.org/turingjump/bookkeeper
