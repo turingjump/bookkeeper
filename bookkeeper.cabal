@@ -34,7 +34,7 @@ library
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 4.11
-    , type-level-sets
+    , type-level-sets >= 0.8.0.0
     , data-default-class
   exposed-modules:
       Bookkeeper
@@ -50,7 +50,7 @@ executable readme
   ghc-options: -Wall -pgmL markdown-unlit -fno-warn-unused-top-binds
   build-depends:
       base >= 4.9 && < 4.11
-    , type-level-sets
+    , type-level-sets >= 0.8.0.0
     , data-default-class
     , base >=4.9 && < 4.11 , bookkeeper
   build-tool-depends: markdown-unlit:markdown-unlit
@@ -65,7 +65,7 @@ test-suite doctest
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 4.11
-    , type-level-sets
+    , type-level-sets >= 0.8.0.0
     , data-default-class
     , doctest >= 0.9 && < 0.12
     , Glob >= 0.7 && < 0.9
@@ -81,7 +81,7 @@ test-suite spec
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 4.11
-    , type-level-sets
+    , type-level-sets >= 0.8.0.0
     , data-default-class
     , bookkeeper
     , hspec > 2 && < 3
@@ -100,7 +100,7 @@ benchmark bench
   ghc-options: -Wall
   build-depends:
       base >= 4.9 && < 4.11
-    , type-level-sets
+    , type-level-sets >= 0.8.0.0
     , data-default-class
     , bookkeeper
     , criterion
