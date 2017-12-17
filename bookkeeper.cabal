@@ -1,6 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.17.1.
+-- This file has been generated from package.yaml by hpack version 0.20.0.
 --
 -- see: https://github.com/sol/hpack
+--
+-- hash: 919c9bd63ad7efe1c1c555270f3970af8bead66e26cb198aca395daf0d1abc13
 
 name:           bookkeeper
 version:        0.2.5
@@ -33,9 +35,9 @@ library
   default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFunctor DeriveGeneric DeriveFoldable DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs MultiParamTypeClasses KindSignatures TypeInType OverloadedStrings RankNTypes ScopedTypeVariables TypeApplications TypeFamilies TypeOperators OverloadedLabels MagicHash
   ghc-options: -Wall
   build-depends:
-      base >= 4.9 && < 4.11
-    , type-level-sets
+      base >=4.9 && <4.11
     , data-default-class
+    , type-level-sets
   exposed-modules:
       Bookkeeper
       Bookkeeper.Internal
@@ -49,10 +51,11 @@ executable readme
       exec
   ghc-options: -Wall -pgmL markdown-unlit -fno-warn-unused-top-binds
   build-depends:
-      base >= 4.9 && < 4.11
-    , type-level-sets
+      base >=4.9 && <4.11
+    , bookkeeper
     , data-default-class
-    , base >=4.9 && < 4.11 , bookkeeper , markdown-unlit
+    , markdown-unlit
+    , type-level-sets
   default-language: Haskell2010
 
 test-suite doctest
@@ -63,12 +66,14 @@ test-suite doctest
   default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFunctor DeriveGeneric DeriveFoldable DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs MultiParamTypeClasses KindSignatures TypeInType OverloadedStrings RankNTypes ScopedTypeVariables TypeApplications TypeFamilies TypeOperators OverloadedLabels MagicHash
   ghc-options: -Wall
   build-depends:
-      base >= 4.9 && < 4.11
-    , type-level-sets
+      Glob >=0.7 && <0.9
+    , base >=4.9 && <4.11
     , data-default-class
-    , doctest >= 0.9 && < 0.12
-    , Glob >= 0.7 && < 0.9
-    , yaml == 0.8.*
+    , doctest >=0.9 && <0.12
+    , type-level-sets
+    , yaml ==0.8.*
+  other-modules:
+      Paths_bookkeeper
   default-language: Haskell2010
 
 test-suite spec
@@ -79,14 +84,15 @@ test-suite spec
   default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFunctor DeriveGeneric DeriveFoldable DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs MultiParamTypeClasses KindSignatures TypeInType OverloadedStrings RankNTypes ScopedTypeVariables TypeApplications TypeFamilies TypeOperators OverloadedLabels MagicHash
   ghc-options: -Wall
   build-depends:
-      base >= 4.9 && < 4.11
-    , type-level-sets
-    , data-default-class
+      QuickCheck >=2.8 && <2.11
+    , base >=4.9 && <4.11
     , bookkeeper
-    , hspec > 2 && < 3
-    , QuickCheck >= 2.8 && < 2.11
+    , data-default-class
+    , hspec >2 && <3
+    , type-level-sets
   other-modules:
       BookkeeperSpec
+      Paths_bookkeeper
   default-language: Haskell2010
 
 benchmark bench
@@ -95,11 +101,13 @@ benchmark bench
   hs-source-dirs:
       bench
   default-extensions: AutoDeriveTypeable ConstraintKinds DataKinds DefaultSignatures DeriveFunctor DeriveGeneric DeriveFoldable DeriveTraversable FlexibleContexts FlexibleInstances FunctionalDependencies GADTs MultiParamTypeClasses KindSignatures TypeInType OverloadedStrings RankNTypes ScopedTypeVariables TypeApplications TypeFamilies TypeOperators OverloadedLabels MagicHash
-  ghc-options: -Wall
+  ghc-options: -Wall -Wall
   build-depends:
-      base >= 4.9 && < 4.11
-    , type-level-sets
-    , data-default-class
+      base >=4.9 && <4.11
     , bookkeeper
     , criterion
+    , data-default-class
+    , type-level-sets
+  other-modules:
+      Paths_bookkeeper
   default-language: Haskell2010
